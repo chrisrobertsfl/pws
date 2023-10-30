@@ -40,6 +40,8 @@ dependencies {
     implementation("com.google.guava:guava:31.1-jre")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

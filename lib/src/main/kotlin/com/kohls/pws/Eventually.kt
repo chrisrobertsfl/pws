@@ -7,7 +7,6 @@ import kotlin.time.Duration.Companion.seconds
 data class Eventually(
     val condition: () -> Boolean
 ) {
-
     fun satisfiedWithin(duration: Duration, interval: Duration = 500.milliseconds): Boolean {
         val end = System.currentTimeMillis() + duration.inWholeMilliseconds
 

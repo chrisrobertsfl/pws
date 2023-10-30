@@ -68,7 +68,7 @@ class DslSpecification : StringSpec({
                             background = true, declaredVariables = mapOf(
                                 "args" to "-U clean install exec:java", "runDirectory" to "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs"
                             ), environmentVariables = mapOf("HTTPS_PROXY" to "http://proxy.kohls.com:3128"), validations = listOf(
-                                Validation.Log(
+                                LogValidator(
                                     duration = 10.seconds, contains = listOf("INFO: Started Stub Server with port 8080")
                                 )
                             )
@@ -232,8 +232,8 @@ data class Runbook(val executionOrder: List<Step>) {
 data class Step(val project: Project)
 
 
-fun log(duration: kotlin.time.Duration, block: Validation.Log.Builder.() -> Unit): Validation.Log {
-    val builder = Validation.Log.Builder()
+fun log(duration: kotlin.time.Duration, block: LogValidator.Builder.() -> Unit): LogValidator {
+    val builder = LogValidator.Builder()
     builder.block()
     builder.duration = duration
     return builder.build()
