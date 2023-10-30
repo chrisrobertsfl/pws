@@ -1,0 +1,11 @@
+#!/usr/bin/env kscript
+workspace {
+}
+
+fun workspace(init: ProjectWorkspace.() -> Unit) {
+    println("hello")
+}
+
+class ProjectWorkspace {
+
+}
