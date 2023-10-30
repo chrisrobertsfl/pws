@@ -9,6 +9,10 @@ import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 class DslSpecification : StringSpec({
+
+    afterTest {
+        killPattern("exec:java")
+    }
     "verify structure" {
         workspace("/tmp/hello") {
 
@@ -23,10 +27,13 @@ class DslSpecification : StringSpec({
 
             project("OLM Stub Server") {
                 source = local("~/projects/olm-meta-repo/olm-stubs")
-                task<ShellScript> {
-                    command = "mvn clean install exec:java"
-                    validations += log(duration = 30.seconds) {
-                        contains("StubServer is running.")
+                task<MavenCommand> {
+                    background = true
+                    declaredVariables += "args" to "-U clean install exec:java"
+                    declaredVariables += "runDirectory" to "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs"
+                    environmentVariables += "HTTPS_PROXY" to "http://proxy.kohls.com:3128"
+                    validations += log(duration = 10.seconds) {
+                        contains("INFO: Started Stub Server with port 8080")
                     }
                 }
             }
@@ -56,9 +63,17 @@ class DslSpecification : StringSpec({
                     source = Source.Local(Directory("~/projects/olm-meta-repo/config-server")),
                 ),
                 Project(
-                    name = "OLM Stub Server",
-                    source = Source.Local(Directory("~/projects/olm-meta-repo/olm-stubs")),
-                    tasks = listOf(ShellScript(command = "mvn clean install exec:java", validations = listOf(Validation.Log(duration = 30.seconds, contains = listOf("StubServer is running.")))))
+                    name = "OLM Stub Server", source = Source.Local(Directory("~/projects/olm-meta-repo/olm-stubs")), tasks = listOf(
+                        MavenCommand(
+                            background = true, declaredVariables = mapOf(
+                                "args" to "-U clean install exec:java", "runDirectory" to "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs"
+                            ), environmentVariables = mapOf("HTTPS_PROXY" to "http://proxy.kohls.com:3128"), validations = listOf(
+                                Validation.Log(
+                                    duration = 10.seconds, contains = listOf("INFO: Started Stub Server with port 8080")
+                                )
+                            )
+                        )
+                    )
 
                 ),
                 Project(
@@ -198,6 +213,10 @@ data class Runbook(val executionOrder: List<Step>) {
                     val deferred = async {
                         // Execute the project here based on its properties
                         println("Executing ${step.project.name}...")
+                        step.project.tasks.forEach {
+                            it.initialize()
+                            it.perform()
+                        }
                         // Add your logic here to execute the project
                     }
                     deferredSteps.add(deferred)
@@ -212,32 +231,6 @@ data class Runbook(val executionOrder: List<Step>) {
 
 data class Step(val project: Project)
 
-
-interface Validation {
-    data class Log(val duration: kotlin.time.Duration, val contains: List<String> = mutableListOf()) : Validation {
-        class Builder {
-            var duration: kotlin.time.Duration = 30.seconds
-            val contains: MutableList<String> = mutableListOf()
-            fun build(): Log {
-                return Log(duration = duration, contains = contains)
-            }
-
-            fun contains(text: String) {
-                this.contains += text
-            }
-
-        }
-    }
-}
-
-
-interface Task {
-    var validations: List<Validation>
-}
-
-data class ShellScript(var command: String? = null, override var validations: List<Validation> = emptyList()) : Task {
-    constructor() : this(null, emptyList())
-}
 
 fun log(duration: kotlin.time.Duration, block: Validation.Log.Builder.() -> Unit): Validation.Log {
     val builder = Validation.Log.Builder()

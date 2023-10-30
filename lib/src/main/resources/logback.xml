@@ -1,0 +1,13 @@
+<!-- TODO:  How can I convert this to yaml? -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Pattern to output the caller's file name and line number -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %class.%method\(%file:%line\) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
