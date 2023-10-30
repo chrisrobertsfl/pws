@@ -2,11 +2,8 @@ package com.kohls.pws
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import java.io.File
 import kotlin.time.Duration.Companion.seconds
+import com.kohls.pws.Source.*
 
 class DslSpecification : StringSpec({
 
@@ -94,8 +91,8 @@ class DslSpecification : StringSpec({
 })
 
 
-fun workspace(targetDirectory: String, block: Workspace.Builder.() -> Unit): Workspace {
-    val builder = Workspace.Builder()
+fun workspace(targetDirectory: String, block: WorkspaceBuilder.() -> Unit): Workspace {
+    val builder = WorkspaceBuilder()
     builder.block()
     builder.targetDirectory(targetDirectory)
     return builder.build().also {
@@ -107,130 +104,15 @@ fun workspace(targetDirectory: String, block: Workspace.Builder.() -> Unit): Wor
     }
 }
 
-fun Workspace.Builder.project(name: String, block: Project.Builder.() -> Unit) {
-    val builder = Project.Builder()
+fun WorkspaceBuilder.project(name: String, block: ProjectBuilder.() -> Unit) {
+    val builder = ProjectBuilder()
     builder.block()
     builder.name = name
     projects += builder.build()
 }
 
-data class Workspace(val targetDirectory: Directory, val projects: Set<Project>) {
-
-    fun createRunbook(): Runbook {
-        val projectMap = projects.associateBy { it.name }
-        val executionOrder = mutableListOf<Step>()
-        val visited = mutableSetOf<Project>()
-
-        fun visit(project: Project) {
-            if (project in visited) return
-            project.executesAfterList.forEach { dependency ->
-                val dependentProject = projectMap[dependency]
-                if (dependentProject != null) {
-                    visit(dependentProject)
-                }
-            }
-            visited.add(project)
-            executionOrder.add(Step(project))
-        }
-
-        projects.forEach { project ->
-            visit(project)
-        }
-
-        return Runbook(executionOrder)
-    }
-
-    class Builder {
-        private lateinit var targetDirectory: Directory
-        val projects: MutableSet<Project> = mutableSetOf()
-        fun build(): Workspace {
-            return Workspace(targetDirectory = targetDirectory, projects = projects)
-        }
-
-        fun targetDirectory(path: String) {
-            this.targetDirectory = Directory(path)
-        }
-    }
-}
-
-data class Project(
-    val name: String, val executesAfterList: List<String> = listOf(), val source: Source = Source.UNKNOWN, val tasks: List<Task> = listOf(), val canBeParallelized: Boolean = false
-) {
-    class Builder {
-        lateinit var name: String
-        private val executesAfterList: MutableList<String> = mutableListOf()
-        var source: Source = Source.UNKNOWN
-        var canBeParallelized: Boolean = false
-        val tasks: MutableList<Task> = mutableListOf()
-        fun build(): Project {
-            return Project(
-                name = name, executesAfterList = executesAfterList, source = source, canBeParallelized = canBeParallelized, tasks = tasks
-            )
-        }
-
-        fun executesAfter(name: String) {
-            executesAfterList += name
-        }
-
-        inline fun <reified T : Task> task(noinline block: T.() -> Unit) {
-            val taskInstance = T::class.java.getDeclaredConstructor().newInstance()
-            taskInstance.block()
-            tasks += taskInstance
-        }
-
-        fun local(path: String): Source = Source.Local(Directory(path))
-        fun git(url: String, branch: String, directory: String): Source = Source.Git(url = url, branch = branch, directory = Directory(directory))
-    }
-}
-
-sealed interface Source {
-    object UNKNOWN : Source
-    data class Local(val directory: Directory) : Source
-    data class Git(val url: String, val branch: String, val directory: Directory) : Source
-}
-
-data class Directory(val path: String) {
-    private val directoryPath: File = File(path)
-    fun delete() = directoryPath.deleteRecursively()
-    fun create() = directoryPath.mkdirs()
-    private fun exists(): Boolean = directoryPath.exists()
-    fun canBeCreated() = !exists() && directoryPath.parentFile?.canWrite() ?: false
-    fun isNotThere(): Boolean = path.isBlank()
-}
-
-data class Runbook(val executionOrder: List<Step>) {
-    fun execute() {
-        runBlocking {
-            val deferredSteps = mutableListOf<Deferred<Unit>>()
-            val executedSteps = mutableSetOf<Step>()
-
-            for (step in executionOrder) {
-                val dependencies = step.project.executesAfterList.mapNotNull { dependencyName ->
-                    executionOrder.find { it.project.name == dependencyName }
-                }
-
-                if (step.project.canBeParallelized || dependencies.all { it in executedSteps }) {
-                    val deferred = async {
-                        // Execute the project here based on its properties
-                        println("Executing ${step.project.name}...")
-                        step.project.tasks.forEach {
-                            it.initialize()
-                            it.perform()
-                        }
-                        // Add your logic here to execute the project
-                    }
-                    deferredSteps.add(deferred)
-                    executedSteps.add(step)
-                }
-            }
-            deferredSteps.forEach { it.await() }
-        }
-    }
-}
-
-
-data class Step(val project: Project)
-
+fun local(path: String): Source = Local(Directory(path))
+fun git(url: String, branch: String, directory: String): Source = Git(url = url, branch = branch, directory = Directory(directory))
 
 fun log(duration: kotlin.time.Duration, block: LogValidator.Builder.() -> Unit): LogValidator {
     val builder = LogValidator.Builder()

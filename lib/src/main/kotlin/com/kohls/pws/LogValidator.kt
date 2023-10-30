@@ -2,11 +2,13 @@ package com.kohls.pws
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 import java.io.File
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-data class LogValidator(val duration: kotlin.time.Duration, val contains: List<String> = mutableListOf()) : Validation {
-    private val logger : Logger = LoggerFactory.getLogger(LogValidator::class.java)
+data class LogValidator(val duration: Duration, val contains: List<String> = mutableListOf()) : Validation {
+    private val logger : Logger = getLogger(LogValidator::class.java)
 
     // TODO Validation:  arg size must be one and of type File
     // TODO Validation on logFile presence
@@ -25,9 +27,7 @@ data class LogValidator(val duration: kotlin.time.Duration, val contains: List<S
     class Builder {
         var duration: kotlin.time.Duration = 30.seconds
         val contains: MutableList<String> = mutableListOf()
-        fun build(): LogValidator {
-            return LogValidator(duration = duration, contains = contains)
-        }
+        fun build(): LogValidator = LogValidator(duration = duration, contains = contains)
         fun contains(text: String) {
             this.contains += text
         }

@@ -12,10 +12,6 @@ class LogValidationSpecification : StringSpec({
             duration = 5.seconds, contains = listOf(
                 "[INFO] -------------------------< com.olm:olm-stubs >--------------------------", "[INFO] --- clean:3.2.0:clean (default-clean) @ olm-stubs ---"
             )
-        ).validate(
-            args = mapOf(
-                "abc" to "def", "logFile" to File("/tmp/olm-stubs.log")
-            )
-        ) shouldBe true
+        ).validate(args = mapOf("logFile" to File("/tmp/olm-stubs.log"))) shouldBe true
     }
 })

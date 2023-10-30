@@ -1,7 +1,8 @@
 package com.kohls.pws
 
-import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 import java.io.File
+import kotlin.io.path.createTempFile
 
 data class BashScript(
     private val contents: String,
@@ -10,7 +11,7 @@ data class BashScript(
     private val declaredVariables: Map<String, String>,
     private val consumer: (String) -> Unit = CONSUMER
 ) {
-    private val logger = LoggerFactory.getLogger(BashScript::class.java)
+    private val logger = getLogger(BashScript::class.java)
     private val file: File = createExecutableFile()
     private val log: Log = Log(path = "/tmp/logs/script-${System.currentTimeMillis()}.log", consumer = consumer)
 
@@ -18,36 +19,27 @@ data class BashScript(
 
     // TODO Prefix name for createTempFile?
     // TODO How do I clean this up at the end of the day?
-    private fun createExecutableFile(): File {
-        val file = kotlin.io.path.createTempFile().toFile().apply {
-            writeText(renderContents())
-            makeExecutable()
-        }
-        return file
+    private fun createExecutableFile(): File = createTempFile().toFile().apply {
+        writeText(renderContents())
+        makeExecutable()
     }
+
 
     private fun renderContents(): String {
-        logger.debug("environment vars are $environmentVariables")
-        val renderedContents = mutableListOf("#!/bin/bash")
-        renderedContents += renderEnvironmentVariables()
-        renderedContents += renderDeclaredVariables()
-        renderedContents += contents
-        val joinToString = renderedContents.joinToString("\n")
-        logger.debug(joinToString)
-        return joinToString
+        val renderedContents = mutableListOf("#!/bin/bash").apply {
+            this += environmentVariables.map { it.asExportAssignment() }
+            this += declaredVariables.map { it.asDeclareAssignment() }
+            this += contents
+        }
+        return renderedContents.joinToString("\n")
     }
 
-    private fun renderEnvironmentVariables(): List<String> = environmentVariables.map {
-        """
-        export ${it.key}="${it.value}"
+    private fun Map.Entry<String, String>.asDeclareAssignment() = asAssignment("declare")
+    private fun Map.Entry<String, String>.asExportAssignment() = asAssignment("export")
+    private fun Map.Entry<String, String>.asAssignment(declaration: String) = """
+        $declaration ${this.key}="${this.value}"
     """.trimIndent()
-    }
 
-    private fun renderDeclaredVariables(): List<String> = declaredVariables.map {
-        """
-        declare ${it.key}="${it.value}"
-    """.trimIndent()
-    }
 
     private fun File.makeExecutable(): Boolean = setExecutable(true)
     fun execute(args: List<Any> = listOf()): Int {
