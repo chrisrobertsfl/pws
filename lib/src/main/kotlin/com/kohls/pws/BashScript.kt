@@ -4,6 +4,17 @@ import org.slf4j.LoggerFactory.getLogger
 import java.io.File
 import kotlin.io.path.createTempFile
 
+/**
+ * TODO:  Observations
+ * The temporary script files created by createExecutableFile() are not explicitly cleaned up.
+ * The function from in the companion object could throw an IllegalArgumentException if the resource cannot be found, which is fine, but the caller must be aware of this.
+ * The execute method contains the main logic for process execution, which involves starting the process, consuming its lines, and potentially waiting for it to complete. The catch block logs the exception but returns -1 as a generalized error code.
+ *
+ * Suggestions
+ * For cleaning up temporary files, you could maintain a list of them and provide a method to delete them when they're no longer needed.
+ * A null-safety check could be added when reading resources.
+ * You might consider breaking down the execute() method into smaller parts for better readability and maintenance.
+ */
 data class BashScript(
     private val contents: String,
     private val background: Boolean,
@@ -25,14 +36,13 @@ data class BashScript(
     }
 
 
-    private fun renderContents(): String {
-        val renderedContents = mutableListOf("#!/bin/bash").apply {
-            this += environmentVariables.map { it.asExportAssignment() }
-            this += declaredVariables.map { it.asDeclareAssignment() }
-            this += contents
-        }
-        return renderedContents.joinToString("\n")
+    private fun renderContents() = with(mutableListOf("#!/bin/bash")) {
+        this += environmentVariables.map { it.asExportAssignment() }
+        this += declaredVariables.map { it.asDeclareAssignment() }
+        this += contents
+        joinToString("\n")
     }
+
 
     private fun Map.Entry<String, String>.asDeclareAssignment() = asAssignment("declare")
     private fun Map.Entry<String, String>.asExportAssignment() = asAssignment("export")
@@ -46,7 +56,15 @@ data class BashScript(
         logger.info("Executing script :  ${file.path}")
         logger.info("Writing to log   :  ${log.file}")
         return try {
-            val process = ProcessBuilder(buildCommandLine(args)).redirectOutput(ProcessBuilder.Redirect.appendTo(log.file)).redirectErrorStream(true).start()
+
+            val processBuilder = ProcessBuilder(buildCommandLine(args))
+            val env = processBuilder.environment() // Get the environment from the ProcessBuilder
+            env.forEach { logger.debug("\tenv['$it.key']=${it.value}")}
+            val process = processBuilder
+                .inheritIO()
+                .redirectOutput(ProcessBuilder.Redirect.appendTo(log.file))
+                .redirectErrorStream(true)
+                .start()
             log.consumeLines()
             if (background) return 0
             val exitCode = process.waitFor()

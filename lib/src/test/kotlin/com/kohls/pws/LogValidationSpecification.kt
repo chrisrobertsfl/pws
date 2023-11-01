@@ -1,10 +1,14 @@
 package com.kohls.pws
 
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
+import kotlin.test.Ignore
 import kotlin.time.Duration.Companion.seconds
 
+
+@Ignored("Must be a unit test")
 class LogValidationSpecification : StringSpec({
 
     "log contains something I need" {

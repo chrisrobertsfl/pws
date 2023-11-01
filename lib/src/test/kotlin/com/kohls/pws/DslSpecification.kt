@@ -103,7 +103,6 @@ fun workspace(targetDirectory: String, block: WorkspaceBuilder.() -> Unit): Work
 
     }
 }
-
 fun WorkspaceBuilder.project(name: String, block: ProjectBuilder.() -> Unit) {
     val builder = ProjectBuilder()
     builder.block()

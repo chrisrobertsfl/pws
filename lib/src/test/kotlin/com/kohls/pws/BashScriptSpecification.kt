@@ -8,7 +8,7 @@ import io.kotest.matchers.shouldBe
 class BashScriptSpecification : StringSpec({
 
     val bashScript = from(
-        lines = listOf("echo hello \${1} \$HTTPS_PROXY", "exit 1"), environmentVariables = mapOf("HTTPS_PROXY" to "http://proxy.kohls.com:3128"),
+        lines = listOf("echo hello \${1} \$HTTPS_PROXY",  "exit 1"), environmentVariables = mapOf("HTTPS_PROXY" to "http://proxy.kohls.com:3128"),
     )
     "check that bash script is well formed" {
         bashScript.contents() shouldBe """
@@ -21,6 +21,7 @@ class BashScriptSpecification : StringSpec({
 
     "check that bash script exits with code 1 and output is what is expected" {
         val bs = BashScript.from(lines = listOf("echo hello \${1} \$HTTPS_PROXY", "exit 1"), environmentVariables = mapOf("HTTPS_PROXY" to "http://proxy.kohls.com:3128"))
+        println(bs.contents())
         bs.execute(listOf("Chris")) shouldBe 1
         bs.logContents() shouldContainExactly listOf("hello Chris http://proxy.kohls.com:3128")
     }
