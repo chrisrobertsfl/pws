@@ -2,6 +2,7 @@ package com.kohls.pws.v2
 
 sealed class Source
 
+object UnknownSource : Source()
 data class LocalSource(
     val path: String
 ) : Source()

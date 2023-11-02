@@ -1,7 +1,7 @@
 package com.kohls.pws.v2
 
 data class Project(
-    val name: String, val source: Source?, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf()
+    val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf()
 ) {
     fun getSourcePath() = when (source) {
         is LocalSource -> source.path
@@ -12,7 +12,7 @@ data class Project(
 
 class ProjectBuilder {
     lateinit var name: String
-    var source: Source? = null
+    lateinit var source: Source
     val tasks: MutableList<Task> = mutableListOf()
     var parallel: Boolean = false
     val dependencies: MutableList<String> = mutableListOf()

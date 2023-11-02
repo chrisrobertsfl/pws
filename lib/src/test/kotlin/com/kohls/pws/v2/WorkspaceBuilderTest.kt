@@ -5,8 +5,14 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 
 class WorkspaceBuilderTest : StringSpec({
     "should build a Workspace object with correct properties" {
-        val projectBuilder1 = ProjectBuilder().apply { name = "Project1" }
-        val projectBuilder2 = ProjectBuilder().apply { name = "Project2" }
+        val projectBuilder1 = ProjectBuilder().apply {
+            name = "Project1"
+            source = UnknownSource
+        }
+        val projectBuilder2 = ProjectBuilder().apply {
+            name = "Project2"
+            source = UnknownSource
+        }
 
         val workspaceBuilder = WorkspaceBuilder().apply {
             projectBuilders.add(projectBuilder1)
