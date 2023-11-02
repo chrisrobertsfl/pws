@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-interface Task : HasIdentity, IsCompilable<Task> {
+interface Task : Entity<Task> {
     fun initialize(): Unit = TODO("Not yet implemented")
     fun perform(): Boolean = TODO("Not yet implemented")
 

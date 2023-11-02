@@ -2,7 +2,7 @@ package com.kohls.pws.v2
 
 data class Project(
     override val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),
-) : HasIdentity, IsCompilable<Project> {
+) : Entity<Project> {
     fun getSourcePath() = when (source) {
         is LocalSource -> source.path
         is GitSource -> source.directory

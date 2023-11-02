@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-data class Workspace(override val id : String , var projects: List<Project>) : HasIdentity, IsCompilable<Workspace> {
+data class Workspace(override val id : String , var projects: List<Project>) : Entity<Workspace> {
     fun execute() {
         createRunbook().execute()
     }
@@ -30,9 +30,6 @@ data class Workspace(override val id : String , var projects: List<Project>) : H
             projects = projects.map { it.compile(lookupTable) }
         }
     }
-
-    //fun compile(compiler: WorkspaceCompiler = WorkspaceCompiler.Standard()): Workspace = compiler.compile(this)
-
 }
 
 
