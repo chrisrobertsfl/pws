@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-data class Workspace(val targetDirectory: Directory, val projects: Set<Project>) {
+data class Workspace(val projects: Set<Project>) {
     fun execute() {
         createRunbook().execute()
     }
@@ -32,12 +32,11 @@ data class Workspace(val targetDirectory: Directory, val projects: Set<Project>)
 
 
 class WorkspaceBuilder {
-    private lateinit var targetDirectory: Directory
     val projectBuilders: MutableSet<ProjectBuilder> = mutableSetOf()
 
     fun build(): Workspace {
         val builtProjects = projectBuilders.map { it.build() }.toSet()
-        return Workspace(targetDirectory = targetDirectory, projects = builtProjects)
+        return Workspace(projects = builtProjects)
     }
 
     fun project(name: String, parallel: Boolean = false, block: ProjectBuilder.() -> Unit) {
@@ -46,11 +45,6 @@ class WorkspaceBuilder {
             this.parallel = parallel
             apply(block)
         }
-    }
-
-
-    fun targetDirectory(path: String) {
-        this.targetDirectory = Directory(path)
     }
 }
 

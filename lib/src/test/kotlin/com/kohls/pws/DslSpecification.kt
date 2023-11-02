@@ -11,7 +11,7 @@ class DslSpecification : StringSpec({
         killPattern("exec:java")
     }
     "verify structure" {
-        workspace("/tmp/hello") {
+        workspace {
 
             project("OLM Shared Utilities") {
                 source = git(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
@@ -49,7 +49,7 @@ class DslSpecification : StringSpec({
             }
 
         } shouldBe Workspace(
-            Directory("/tmp/hello"), mutableSetOf(
+            mutableSetOf(
                 Project(
                     "OLM Shared Utilities",
                     source = Source.Git(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = Directory("/tmp/workspace/olm-shared-utils")),
@@ -91,10 +91,9 @@ class DslSpecification : StringSpec({
 })
 
 
-fun workspace(targetDirectory: String, block: WorkspaceBuilder.() -> Unit): Workspace {
+fun workspace(block: WorkspaceBuilder.() -> Unit): Workspace {
     val builder = WorkspaceBuilder()
     builder.block()
-    builder.targetDirectory(targetDirectory)
     return builder.build().also {
         println("Execution Order would be:")
         val createRunbook = it.createRunbook()

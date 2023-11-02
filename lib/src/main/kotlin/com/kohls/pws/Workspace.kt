@@ -1,6 +1,6 @@
 package com.kohls.pws
 
-data class Workspace(val targetDirectory: Directory, val projects: Set<Project>) {
+data class Workspace(val projects: Set<Project>) {
     fun createRunbook(): Runbook {
         val projectMap = projects.associateBy { it.name }
         val executionOrder = mutableListOf<Step>()

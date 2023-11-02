@@ -20,7 +20,7 @@ class NewDslSpecification : StringSpec({
         killPatterns("exec:java")
     }
 
-    val workspace = myWorkspace("/tmp/hello") {
+    val workspace = workspace {
 //        project("OLM Shared Utilities") {
 //            gitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
 //        }
@@ -63,12 +63,9 @@ class NewDslSpecification : StringSpec({
 
     "DSL creates a Workspace with correct projects and configurations" {
 
-        workspace.targetDirectory.path shouldBe "/tmp/hello"
         workspace.projects shouldHaveSize 1
 
         workspace shouldBe Workspace(
-            targetDirectory = Directory("/tmp/hello"),
-
             projects = setOf(
 ////                Project(
 ////                    name = "OLM Shared Utilities", source = GitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
@@ -111,11 +108,8 @@ class NewDslSpecification : StringSpec({
     }
 })
 
-fun myWorkspace(path: String, block: WorkspaceBuilder.() -> Unit): Workspace {
-    return WorkspaceBuilder().apply {
-        targetDirectory(path)
-        apply(block)
-    }.build().compile()
+fun workspace(block: WorkspaceBuilder.() -> Unit): Workspace {
+    return WorkspaceBuilder().apply(block).build().compile()
 }
 
 
