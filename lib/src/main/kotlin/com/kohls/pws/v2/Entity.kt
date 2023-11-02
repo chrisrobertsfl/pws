@@ -1,5 +1,6 @@
 package com.kohls.pws.v2
 
+import java.util.*
 
 interface Entity<T> : IsCompilable<T>, HasIdentity
 
@@ -11,26 +12,13 @@ interface IsCompilable<T> {
     fun compile(lookupTable: LookupTable): T
 }
 
-data class LookupTable(private val workspace: Workspace) {
-    private val taskEntries: Map<String, TaskEntry>
+interface IdGenerator {
+    fun generate(): String
 
-    init {
-        taskEntries = mutableMapOf()
-        workspace.projects.forEach { project ->
-            project.tasks.forEach { task ->
-                taskEntries[task.id] = TaskEntry(project)
-            }
+    class Universal(var prefix: String? = null) : IdGenerator {
+        override fun generate(): String = buildString {
+            prefix?.let { append("${prefix}-") }
+            append(UUID.randomUUID().toString())
         }
-    }
-
-    fun using(task: Task): TaskEntry {
-        return taskEntries[task.id] ?: throw IllegalArgumentException("No task id found in lookup table")
-    }
-
-}
-
-data class TaskEntry(val project: Project) {
-    fun getProjectSourcePath(): String {
-        return project.getSourcePath()
     }
 }
