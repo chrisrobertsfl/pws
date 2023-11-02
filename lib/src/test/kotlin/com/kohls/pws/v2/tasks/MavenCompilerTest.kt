@@ -20,14 +20,11 @@ class MavenCompilerTest : StringSpec({
 })
 
 class MavenCompiler {
-        val lookupTable = LookupTable()
-        fun compile(maven: Maven): Maven {
-            if (maven.pomXmlFilePath == null) {
-                val projectSourcePath = lookupTable.findProjectSourcePath()
-                val pomXmlFilePath = File("${projectSourcePath}/pom.xml")
-                maven.pomXmlFilePath = pomXmlFilePath
-            }
-            return maven        }
+    val lookupTable = LookupTable()
+    fun compile(maven: Maven): Maven {
+        maven.pomXmlFilePath = maven.pomXmlFilePath ?: File("${lookupTable.findProjectSourcePath()}/pom.xml")
+        return maven
+    }
 
 }
 
