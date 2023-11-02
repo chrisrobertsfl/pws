@@ -1,54 +1,28 @@
 package com.kohls.pws.v2
 
+import com.kohls.pws.v2.tasks.Maven
 import io.kotest.core.spec.style.StringSpec
-import java.util.*
+import io.kotest.matchers.shouldBe
+import java.io.File
 
 class ProjectCompilerTest : StringSpec({
 
-    val original = Project(name = "name", source = LocalSource("/project"), tasks = emptyList(), parallel = true, dependencies = emptyList(), id = "project-1")
-    val lookupTable = LookupTable()
-    "Register project with compiler" {
-        val compiler = ProjectCompiler(lookupTable)
-        compiler.compile(original)
+    val task = Maven(
+        id = "task-1",
+        args = emptyList(),
+        variables = mutableMapOf(),
+        background = false,
+        settingsXmlFilePath = File("/project/settings.xml"),
+        pomXmlFilePath = File("/project/pom.xml"),
+        validations = emptyList()
+    )
+    val projectAfter = Project(name = "name", source = LocalSource("/project"), tasks = listOf(task), parallel = true, dependencies = emptyList(), id = "project-1")
+    val projectBefore = projectAfter.copy(tasks = listOf(task.copy(pomXmlFilePath = null, settingsXmlFilePath = null)))
+    val workspace = Workspace(id = "workspace-1", listOf(projectBefore))
+    val lookupTable = LookupTable(workspace)
+    "Run project with compiler" {
+        projectBefore.compile(lookupTable) shouldBe projectAfter
     }
 })
 
-sealed class Compiler<T : Any>(private val lookupTable: LookupTable) {
-    lateinit var id: String
-    fun compile(target: T): T {
-        id = lookupTable.addEntry(target)
-        println("id = ${id}")
-        return doCompilation(target)
-    }
 
-    abstract fun doCompilation(target: T): T
-}
-
-data class ProjectCompiler(val lookupTable: LookupTable) : Compiler<Project>(lookupTable = lookupTable) {
-    override fun doCompilation(target: Project): Project {
-        println("Hello I am compiler $id and I'm happily compiling: ${target}")
-        return target
-    }
-
-}
-
-data class LookupTable(val projectEntries: MutableMap<String, ProjectEntry> = mutableMapOf()) {
-    fun findProjectSourcePath(): String {
-        return "/tmp"
-    }
-
-    fun findById(id: String): Any? {
-        return projectEntries[id]
-    }
-
-    fun addEntry(registrant: Any): String {
-        val id = UUID.randomUUID().toString()
-        when (registrant) {
-            is Project -> projectEntries[id] = ProjectEntry(registrant)
-        }
-        return id
-
-    }
-}
-
-data class ProjectEntry(val project: Project)

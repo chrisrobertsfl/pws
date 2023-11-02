@@ -1,12 +1,16 @@
 package com.kohls.pws.v2
 
 data class Project(
-    val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),
-) {
+    override val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),
+) : HasIdentity, IsCompilable<Project> {
     fun getSourcePath() = when (source) {
         is LocalSource -> source.path
         is GitSource -> source.directory
         else -> throw IllegalArgumentException("Need to deal with unknown source")
+    }
+
+    override fun compile(lookupTable: LookupTable): Project {
+        return this.copy(tasks = tasks.map{ it.compile(lookupTable)})
     }
 }
 

@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-interface Task {
+interface Task : HasIdentity, IsCompilable<Task> {
     fun initialize(): Unit = TODO("Not yet implemented")
     fun perform(): Boolean = TODO("Not yet implemented")
 
@@ -8,6 +8,6 @@ interface Task {
 }
 
 interface TaskBuilder {
-    val idGenerator : IdGenerator
+    val idGenerator: IdGenerator
     fun build(): Task
 }

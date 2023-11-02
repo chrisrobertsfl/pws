@@ -74,7 +74,7 @@ class NewDslSpecification : StringSpec({
 
         workspace shouldBe Workspace(
             id = "workspace-1",
-            projects = setOf(
+            projects = listOf(
 ////                Project(
 ////                    name = "OLM Shared Utilities", source = GitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
 ////                ),
@@ -119,7 +119,9 @@ class NewDslSpecification : StringSpec({
 })
 
 fun workspace(workspaceIdGenerator: IdGenerator = IdGenerator.Universal("workspace"), block: WorkspaceBuilder.() -> Unit): Workspace {
-    return WorkspaceBuilder(workspaceIdGenerator).apply(block).build().compile()
+    val workspace = WorkspaceBuilder(workspaceIdGenerator).apply(block).build()
+    val lookupTable = LookupTable(workspace)
+    return workspace.compile(lookupTable = lookupTable)
 }
 
 

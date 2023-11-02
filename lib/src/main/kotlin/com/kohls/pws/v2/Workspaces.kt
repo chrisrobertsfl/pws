@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-data class Workspace(val id : String , val projects: Set<Project>) {
+data class Workspace(override val id : String , var projects: List<Project>) : HasIdentity, IsCompilable<Workspace> {
     fun execute() {
         createRunbook().execute()
     }
@@ -25,15 +25,21 @@ data class Workspace(val id : String , val projects: Set<Project>) {
         return Runbook(executionOrder)
     }
 
-    fun compile(compiler: WorkspaceCompiler = WorkspaceCompiler.Standard()): Workspace = compiler.compile(this)
+    override fun compile(lookupTable: LookupTable): Workspace {
+        return apply {
+            projects = projects.map { it.compile(lookupTable) }
+        }
+    }
+
+    //fun compile(compiler: WorkspaceCompiler = WorkspaceCompiler.Standard()): Workspace = compiler.compile(this)
 
 }
 
 
 class WorkspaceBuilder(private val idGenerator : IdGenerator = IdGenerator.Universal("workspace")) {
-    val projectBuilders: MutableSet<ProjectBuilder> = mutableSetOf()
+    val projectBuilders: MutableList<ProjectBuilder> = mutableListOf()
     fun build(): Workspace {
-        val builtProjects = projectBuilders.map { it.build() }.toSet()
+        val builtProjects = projectBuilders.map { it.build() }
         return Workspace(id = idGenerator.generate(), projects = builtProjects)
     }
 
