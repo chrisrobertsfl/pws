@@ -1,15 +1,19 @@
 package com.kohls.pws.v2.tasks
 
-import com.kohls.pws.MavenCommand
 import com.kohls.pws.v2.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 import java.io.File
 
 data class Maven(
-    override val id : String, val args: List<String>, val variables: MutableMap<String, String>, val background: Boolean, var settingsXmlFilePath: File?, var pomXmlFilePath: File?, override val validations: List<Validation>
+    override val id: String,
+    val args: List<String>,
+    val variables: MutableMap<String, String>,
+    val background: Boolean,
+    var settingsXmlFilePath: File?,
+    var pomXmlFilePath: File?,
+    override val validations: List<Validation>
 ) : Task {
-    private val logger: Logger = LoggerFactory.getLogger(MavenCommand::class.java)
+    private val logger = getLogger(Maven::class.java)
 
     lateinit var bashScript: BashScript
     override fun initialize() {

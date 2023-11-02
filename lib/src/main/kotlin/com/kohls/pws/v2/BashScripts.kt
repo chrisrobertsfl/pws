@@ -35,7 +35,6 @@ data class BashScript(private val body: String, private val variables: Map<Strin
     }
 
     private fun executeProcess(commandLine: List<String>): Int {
-        logger.info("About to execute process...")
         val process = ProcessBuilder(commandLine).inheritIO().redirectOutput(ProcessBuilder.Redirect.appendTo(log.file)).redirectErrorStream(true).start()
 
         log.consumeLines()

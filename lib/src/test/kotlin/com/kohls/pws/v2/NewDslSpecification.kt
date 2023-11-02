@@ -1,6 +1,5 @@
 package com.kohls.pws.v2
 
-import com.kohls.pws.killPatterns
 import com.kohls.pws.v2.tasks.Maven
 import com.kohls.pws.v2.tasks.MavenBuilder
 import com.kohls.pws.v2.validations.LogValidator
@@ -121,6 +120,7 @@ class NewDslSpecification : StringSpec({
 fun workspace(workspaceIdGenerator: IdGenerator = IdGenerator.Universal("workspace"), block: WorkspaceBuilder.() -> Unit): Workspace {
     val workspace = WorkspaceBuilder(workspaceIdGenerator).apply(block).build()
     val lookupTable = LookupTable(workspace)
+
     return workspace.compile(lookupTable = lookupTable)
 }
 

@@ -18,7 +18,7 @@ data class LogValidator(val duration: Duration, val contains: List<String> = mut
         val logFile = args["logFile"] as File
         val satisfiedWithin = Eventually(condition = {
             val result = contains.all { it in logFile.readText() }
-            logger.info("Result is $result:  Checked contents for ${contains}")
+            logger.debug("Result is $result:  Checked contents for ${contains}")
             result
         }).satisfiedWithin(duration)
         logger.info("satisfiedWithin is $satisfiedWithin")

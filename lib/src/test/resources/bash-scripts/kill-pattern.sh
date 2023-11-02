@@ -39,5 +39,5 @@ kill_pattern() {
 }
 
 
-echo "o PID search for '${pattern}'"
-kill_pattern "${pattern}"
+echo "o PID search for '${1}'"
+kill_pattern "${1}"
