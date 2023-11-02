@@ -6,17 +6,11 @@ import java.io.File
 
 class MavenCompilerTest : StringSpec({
 
-    "Missing pom is derived from project source" {
-        MavenCompiler().compile(
-            Maven(args = listOf(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File(""), pomXmlFilePath = null, validations = listOf())
-        ) shouldBe Maven(args = listOf(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File(""), pomXmlFilePath = File("/project/pom.xml"), validations = listOf())
-    }
+    val original = Maven(args = listOf(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File("/tmp/.m2/settings.xml"), pomXmlFilePath = File("/tmp/pom.xml"), validations = listOf())
 
-    "Nothing happens when all fields are populated" {
-        MavenCompiler().compile(
-            Maven(args = listOf(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File(""), pomXmlFilePath = File("/tmp/pom.xml"), validations = listOf())
-        ) shouldBe Maven(args = listOf(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File(""), pomXmlFilePath = File("/tmp/pom.xml"), validations = listOf())
-    }
+    "Missing pom is derived from project source" { MavenCompiler().compile(original.copy(pomXmlFilePath = null)) shouldBe original }
+
+    "Nothing happens when all fields are populated" { MavenCompiler().compile(original) shouldBe original }
 })
 
 class MavenCompiler {
@@ -30,7 +24,7 @@ class MavenCompiler {
 
 class LookupTable {
     fun findProjectSourcePath(): String {
-        return "/project"
+        return "/tmp"
     }
 
 }
