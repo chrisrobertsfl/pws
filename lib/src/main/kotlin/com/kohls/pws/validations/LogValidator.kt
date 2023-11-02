@@ -1,7 +1,7 @@
-package com.kohls.pws.v2.validations
+package com.kohls.pws.validations
 
-import com.kohls.pws.v2.Eventually
-import com.kohls.pws.v2.Validation
+import com.kohls.pws.Eventually
+import com.kohls.pws.Validation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File

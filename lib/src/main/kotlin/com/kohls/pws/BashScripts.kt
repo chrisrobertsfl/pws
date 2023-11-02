@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 import org.slf4j.LoggerFactory
 import java.io.File

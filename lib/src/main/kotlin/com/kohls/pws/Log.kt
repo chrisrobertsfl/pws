@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory

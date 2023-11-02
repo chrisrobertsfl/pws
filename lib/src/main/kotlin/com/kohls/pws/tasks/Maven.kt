@@ -1,6 +1,6 @@
-package com.kohls.pws.v2.tasks
+package com.kohls.pws.tasks
 
-import com.kohls.pws.v2.*
+import com.kohls.pws.*
 import org.slf4j.LoggerFactory.getLogger
 import java.io.File
 

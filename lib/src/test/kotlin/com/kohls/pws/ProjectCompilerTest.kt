@@ -1,6 +1,10 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
-import com.kohls.pws.v2.tasks.Maven
+import com.kohls.pws.LocalSource
+import com.kohls.pws.LookupTable
+import com.kohls.pws.Project
+import com.kohls.pws.Workspace
+import com.kohls.pws.tasks.Maven
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File

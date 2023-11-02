@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 data class Project(
     override val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),

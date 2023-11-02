@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 data class Workspace(override val id : String , var projects: List<Project>) : Entity<Workspace> {
     fun execute() {

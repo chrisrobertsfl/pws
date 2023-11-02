@@ -1,8 +1,8 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
-import com.kohls.pws.v2.tasks.Maven
-import com.kohls.pws.v2.tasks.MavenBuilder
-import com.kohls.pws.v2.validations.LogValidator
+import com.kohls.pws.tasks.Maven
+import com.kohls.pws.tasks.MavenBuilder
+import com.kohls.pws.validations.LogValidator
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe

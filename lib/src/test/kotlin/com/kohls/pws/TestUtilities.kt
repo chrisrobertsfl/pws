@@ -1,5 +1,4 @@
-package com.kohls.pws.v2
-
+package com.kohls.pws
 
 
 fun killPatterns(vararg patterns: String) {

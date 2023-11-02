@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 data class LookupTable(private val workspace: Workspace) {
     private val taskEntries: Map<String, TaskEntry>

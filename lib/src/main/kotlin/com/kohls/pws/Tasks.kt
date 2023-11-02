@@ -1,4 +1,4 @@
-package com.kohls.pws.v2
+package com.kohls.pws
 
 interface Task : Entity<Task> {
     fun initialize(): Unit = TODO("Not yet implemented")

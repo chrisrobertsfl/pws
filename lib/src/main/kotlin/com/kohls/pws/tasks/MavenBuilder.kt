@@ -1,10 +1,10 @@
-package com.kohls.pws.v2.tasks
+package com.kohls.pws.tasks
 
-import com.kohls.pws.v2.IdGenerator
-import com.kohls.pws.v2.Task
-import com.kohls.pws.v2.TaskBuilder
-import com.kohls.pws.v2.Validation
-import com.kohls.pws.v2.validations.LogValidator
+import com.kohls.pws.IdGenerator
+import com.kohls.pws.Task
+import com.kohls.pws.TaskBuilder
+import com.kohls.pws.Validation
+import com.kohls.pws.validations.LogValidator
 import java.io.File
 import kotlin.time.Duration
 
