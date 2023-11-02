@@ -1,7 +1,7 @@
 package com.kohls.pws.v2
 
 data class Project(
-    val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf()
+    val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),
 ) {
     fun getSourcePath() = when (source) {
         is LocalSource -> source.path
@@ -10,7 +10,7 @@ data class Project(
     }
 }
 
-class ProjectBuilder {
+class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("project")) {
     lateinit var name: String
     lateinit var source: Source
     val tasks: MutableList<Task> = mutableListOf()
@@ -19,7 +19,7 @@ class ProjectBuilder {
 
     fun build(): Project {
         return Project(
-            name = name, source = source, tasks = tasks, parallel = parallel, dependencies = dependencies
+            name = name, source = source, tasks = tasks, parallel = parallel, dependencies = dependencies, id = idGenerator.generate()
         )
     }
 
@@ -31,11 +31,18 @@ class ProjectBuilder {
         this.source = LocalSource(path)
     }
 
-    inline fun <reified T : TaskBuilder> task(noinline block: T.() -> Unit) {
-        val taskBuilder = T::class.java.getDeclaredConstructor().newInstance()
+    inline fun <reified T : TaskBuilder> task(
+        idGenerator: IdGenerator,
+        noinline block: T.() -> Unit
+    ) {
+        // Find the constructor that takes an IdGenerator as the only argument
+        val constructor = T::class.java.getDeclaredConstructor(IdGenerator::class.java)
+        // Create a new instance of T using the constructor with idGenerator
+        val taskBuilder = constructor.newInstance(idGenerator)
         taskBuilder.block()
         tasks += taskBuilder.build()
     }
+
 
 
     fun dependencies(builder: DependenciesBuilder.() -> Unit) {

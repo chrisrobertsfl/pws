@@ -10,6 +10,9 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
+data class CountingGenerator(val prefix : String, var counter : Int = 0) : IdGenerator {
+    override fun generate(): String = "$prefix-${++counter}"
+}
 
 // TODO:  Need to perform things in phases:
 // phase 1:  compose
@@ -19,8 +22,11 @@ class NewDslSpecification : StringSpec({
     afterTest {
         killPatterns("exec:java")
     }
+    val workspaceIdGenerator = CountingGenerator("workspace")
+    val projectIdGenerator =  CountingGenerator("project")
+    val taskIdGenerator =  CountingGenerator("task")
 
-    val workspace = workspace {
+    val workspace = workspace(workspaceIdGenerator) {
 //        project("OLM Shared Utilities") {
 //            gitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
 //        }
@@ -30,9 +36,9 @@ class NewDslSpecification : StringSpec({
 //                executesAfter("OLM Shared Utilities")
 //            }
 //        }
-        project("OLM Stub Server") {
+        project("OLM Stub Server", projectIdGenerator = projectIdGenerator) {
             localSource(path = "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs")
-            task<MavenBuilder> {
+            task<MavenBuilder>(idGenerator = taskIdGenerator) {
                 maven(background = true) {
                     args("-U", "clean", "install", "exec:java")
                     proxy("http://proxy.kohls.com:3128")
@@ -63,9 +69,11 @@ class NewDslSpecification : StringSpec({
 
     "DSL creates a Workspace with correct projects and configurations" {
 
+        println("workspace = ${workspace}")
         workspace.projects shouldHaveSize 1
 
         workspace shouldBe Workspace(
+            id = "workspace-1",
             projects = setOf(
 ////                Project(
 ////                    name = "OLM Shared Utilities", source = GitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
@@ -74,10 +82,12 @@ class NewDslSpecification : StringSpec({
 //                    name = "OLM Configuration Service", source = LocalSource(path = "~/projects/olm-meta-repo/config-server"), dependencies = listOf("OLM Shared Utilities")
 //                ),
                 Project(
+                    id = "project-1",
                     name = "OLM Stub Server",
                     source = LocalSource(path = "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs"),
                     tasks = listOf(
                         Maven(
+                            id = "task-1",
                             background = true,
                             pomXmlFilePath = File("/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs/pom.xml"),
                             settingsXmlFilePath = File("/Users/TKMA5QX/data/repo/maven/settings.xml"),
@@ -108,8 +118,8 @@ class NewDslSpecification : StringSpec({
     }
 })
 
-fun workspace(block: WorkspaceBuilder.() -> Unit): Workspace {
-    return WorkspaceBuilder().apply(block).build().compile()
+fun workspace(workspaceIdGenerator: IdGenerator = IdGenerator.Universal("workspace"), block: WorkspaceBuilder.() -> Unit): Workspace {
+    return WorkspaceBuilder(workspaceIdGenerator).apply(block).build().compile()
 }
 
 

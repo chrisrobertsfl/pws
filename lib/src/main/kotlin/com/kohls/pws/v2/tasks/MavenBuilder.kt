@@ -1,5 +1,6 @@
 package com.kohls.pws.v2.tasks
 
+import com.kohls.pws.v2.IdGenerator
 import com.kohls.pws.v2.Task
 import com.kohls.pws.v2.TaskBuilder
 import com.kohls.pws.v2.Validation
@@ -7,8 +8,7 @@ import com.kohls.pws.v2.validations.LogValidator
 import java.io.File
 import kotlin.time.Duration
 
-class MavenBuilder : TaskBuilder {
-
+class MavenBuilder(override val idGenerator: IdGenerator) : TaskBuilder {
     private val args = mutableListOf<String>()
     private val variables = mutableMapOf<String, String>()
     private var  background: Boolean = false
@@ -16,7 +16,7 @@ class MavenBuilder : TaskBuilder {
     private  var pomXmlFilePath: File? = null
     private val validations = mutableListOf<Validation>()
     override fun build(): Task {
-        return Maven(args, variables, background, settingsXmlFilePath, pomXmlFilePath, validations)
+        return Maven(idGenerator.generate(), args, variables, background, settingsXmlFilePath, pomXmlFilePath, validations)
     }
 
     fun MavenBuilder.maven(background: Boolean = false, block : MavenBuilder.() -> Unit) {

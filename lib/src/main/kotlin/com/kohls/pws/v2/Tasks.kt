@@ -8,5 +8,6 @@ interface Task {
 }
 
 interface TaskBuilder {
+    val idGenerator : IdGenerator
     fun build(): Task
 }

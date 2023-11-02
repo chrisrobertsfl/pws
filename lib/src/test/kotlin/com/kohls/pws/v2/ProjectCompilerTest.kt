@@ -5,7 +5,7 @@ import java.util.*
 
 class ProjectCompilerTest : StringSpec({
 
-    val original = Project(name = "name", source = LocalSource("/project"), tasks = emptyList(), parallel = true, dependencies = emptyList())
+    val original = Project(name = "name", source = LocalSource("/project"), tasks = emptyList(), parallel = true, dependencies = emptyList(), id = "project-1")
     val lookupTable = LookupTable()
     "Register project with compiler" {
         val compiler = ProjectCompiler(lookupTable)

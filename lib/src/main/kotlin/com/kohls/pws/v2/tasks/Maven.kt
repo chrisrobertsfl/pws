@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 data class Maven(
-    val args: List<String>, val variables: MutableMap<String, String>, val background: Boolean, var settingsXmlFilePath: File?, var pomXmlFilePath: File?, override val validations: List<Validation>
+    val id : String, val args: List<String>, val variables: MutableMap<String, String>, val background: Boolean, var settingsXmlFilePath: File?, var pomXmlFilePath: File?, override val validations: List<Validation>
 ) : Task {
     private val logger: Logger = LoggerFactory.getLogger(MavenCommand::class.java)
 

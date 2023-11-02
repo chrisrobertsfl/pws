@@ -1,6 +1,6 @@
 package com.kohls.pws.v2
 
-data class Workspace(val projects: Set<Project>) {
+data class Workspace(val id : String , val projects: Set<Project>) {
     fun execute() {
         createRunbook().execute()
     }
@@ -30,17 +30,15 @@ data class Workspace(val projects: Set<Project>) {
 }
 
 
-
-class WorkspaceBuilder {
+class WorkspaceBuilder(private val idGenerator : IdGenerator = IdGenerator.Universal("workspace")) {
     val projectBuilders: MutableSet<ProjectBuilder> = mutableSetOf()
-
     fun build(): Workspace {
         val builtProjects = projectBuilders.map { it.build() }.toSet()
-        return Workspace(projects = builtProjects)
+        return Workspace(id = idGenerator.generate(), projects = builtProjects)
     }
 
-    fun project(name: String, parallel: Boolean = false, block: ProjectBuilder.() -> Unit) {
-        projectBuilders += ProjectBuilder().apply {
+    fun project(name: String, parallel: Boolean = false, projectIdGenerator : IdGenerator, block: ProjectBuilder.() -> Unit) {
+        projectBuilders += ProjectBuilder(projectIdGenerator).apply {
             this.name = name
             this.parallel = parallel
             apply(block)

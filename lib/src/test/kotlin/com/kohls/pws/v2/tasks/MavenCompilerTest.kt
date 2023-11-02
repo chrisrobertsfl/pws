@@ -7,7 +7,7 @@ import java.io.File
 
 class MavenCompilerTest : StringSpec({
 
-    val original = Maven(args = emptyList(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File("/tmp/settings.xml"), pomXmlFilePath = File("/tmp/pom.xml"), validations = emptyList())
+    val original = Maven(id = "", args = emptyList(), variables = mutableMapOf(), background = false, settingsXmlFilePath = File("/tmp/settings.xml"), pomXmlFilePath = File("/tmp/pom.xml"), validations = emptyList())
 
     "Missing pom is derived from project source" { MavenCompiler().compile(original.copy(settingsXmlFilePath = null)) shouldBe original }
     "Missing settings is derived from project source" { MavenCompiler().compile(original.copy(pomXmlFilePath = null)) shouldBe original }
