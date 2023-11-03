@@ -1,8 +1,6 @@
 package com.kohls.pws.tasks
 
 import com.ingenifi.engine.ClasspathResource
-import com.ingenifi.engine.Engine
-import com.ingenifi.engine.Option.*
 import com.kohls.pws.*
 import com.kohls.pws.tasks.ConfirmationException.Error
 import org.slf4j.LoggerFactory.getLogger
@@ -42,8 +40,7 @@ data class Maven(
     }
 
     override fun confirm(): Task {
-        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/task.drl")))
-            .run<Task, Error>(this)
+        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/task.drl"))).run<Task, Error>(this)
         if (errors.isNotEmpty()) throw ConfirmationException(message = "Confirmation failed for task $id", errors = errors)
         return this
     }

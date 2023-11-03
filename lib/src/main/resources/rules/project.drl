@@ -1,0 +1,31 @@
+package com.kohls.pws
+
+import com.kohls.pws.tasks.ConfirmationException.Error;
+
+rule "Missing name - Blank"
+when
+    Project( name:  name.isBlank() == true )
+then
+    insert( new Error("Missing name") );
+ end
+
+ rule "Source path does not exist"
+ when
+     Project( source: source )
+     Source( sourcepath: path ) from source
+     Directory( this.exists() == false, path: path  ) from sourcepath
+ then
+     insert( new Error("Project source path directory could not be found:  " + path) );
+  end
+
+rule "Missing one or more dependencies - Blank"
+when
+    Project( dependencies: dependencies )
+    exists ( String( this.isBlank() == true ) from dependencies )
+    // at least one dependency is blank
+then
+     insert( new Error("Missing one or more dependencies") );
+
+ end
+
+

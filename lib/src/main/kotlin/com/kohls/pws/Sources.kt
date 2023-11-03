@@ -1,12 +1,12 @@
 package com.kohls.pws
 
-sealed class Source
+sealed interface Source {
+    val path: Directory
+}
 
-object UnknownSource : Source()
-data class LocalSource(
-    val path: String
-) : Source()
+object UnknownSource : Source {
+    override val path: Directory get() = throw UnsupportedOperationException("Unknown source has no path")
+}
 
-data class GitSource(
-    val url: String, val branch: String, val directory: String
-) : Source()
+data class LocalSource(override val path: Directory) : Source
+data class GitSource(override val path: Directory, val url: String, val branch: String) : Source

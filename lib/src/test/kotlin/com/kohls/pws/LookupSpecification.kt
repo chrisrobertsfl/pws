@@ -1,9 +1,5 @@
 package com.kohls.pws
 
-import com.kohls.pws.LocalSource
-import com.kohls.pws.LookupTable
-import com.kohls.pws.Project
-import com.kohls.pws.Workspace
 import com.kohls.pws.tasks.Maven
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -23,7 +19,7 @@ class LookupSpecification : StringSpec({
 
         val workspace = Workspace(
             id = "workspace-1", listOf(
-                Project(name = "name", source = LocalSource("/project"), tasks = listOf(task), parallel = true, dependencies = emptyList(), id = "project-1")
+                Project(name = "name", source = LocalSource(Directory("/project")), tasks = listOf(task), parallel = true, dependencies = emptyList(), id = "project-1")
             )
         )
         val lookupTable = LookupTable(workspace)

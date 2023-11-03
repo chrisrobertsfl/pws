@@ -14,5 +14,5 @@ data class LookupTable(private val workspace: Workspace) {
 }
 
 data class TaskEntry(val project: Project) {
-    fun getProjectSourcePath(): String = project.getSourcePath()
+    fun getProjectSourcePath(): String = project.source.path.path
 }

@@ -16,7 +16,7 @@ class ProjectCompilerTest : StringSpec({
         pomXmlFilePath = File("/project/pom.xml"),
         validations = emptyList()
     )
-    val projectAfter = Project(name = "name", source = LocalSource("/project"), tasks = listOf(task), parallel = true, dependencies = emptyList(), id = "project-1")
+    val projectAfter = Project(name = "name", source = LocalSource(Directory("/project")), tasks = listOf(task), parallel = true, dependencies = emptyList(), id = "project-1")
     val projectBefore = projectAfter.copy(tasks = listOf(task.copy(pomXmlFilePath = null, settingsXmlFilePath = null)))
     val workspace = Workspace(id = "workspace-1", listOf(projectBefore))
     val lookupTable = LookupTable(workspace)

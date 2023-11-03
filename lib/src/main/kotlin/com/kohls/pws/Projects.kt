@@ -1,15 +1,19 @@
 package com.kohls.pws
 
+import com.ingenifi.engine.ClasspathResource
+import com.kohls.pws.tasks.ConfirmationException
+
 data class Project(
     override val id: String, val name: String, val source: Source, val tasks: List<Task> = listOf(), val parallel: Boolean = false, val dependencies: List<String> = listOf(),
 ) : Entity<Project> {
-    fun getSourcePath() = when (source) {
-        is LocalSource -> source.path
-        is GitSource -> source.directory
-        else -> throw IllegalArgumentException("Need to deal with unknown source")
-    }
 
     override fun compile(lookupTable: LookupTable): Project = this.copy(tasks = tasks.map { it.compile(lookupTable) })
+
+    override fun confirm(): Project {
+        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/project.drl"))).run<Project, ConfirmationException.Error>(this)
+        if (errors.isNotEmpty()) throw ConfirmationException(message = "Confirmation failed for project $id", errors = errors)
+        return this
+    }
 }
 
 class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("project")) {
@@ -21,12 +25,12 @@ class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("proje
 
     fun build() = Project(name = name, source = source, tasks = tasks, parallel = parallel, dependencies = dependencies, id = idGenerator.generate())
 
-    fun gitSource(url: String, branch: String, directory: String): Unit {
-        source = GitSource(url, branch, directory)
+    fun gitSource(url: String, branch: String, path: String): Unit {
+        source = GitSource(url = url, branch = branch, path = Directory(path))
     }
 
     fun localSource(path: String) {
-        this.source = LocalSource(path)
+        this.source = LocalSource(Directory(path))
     }
 
     inline fun <reified T : TaskBuilder> task(idGenerator: IdGenerator, noinline block: T.() -> Unit) {

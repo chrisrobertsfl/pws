@@ -83,7 +83,7 @@ class NewDslSpecification : StringSpec({
                 Project(
                     id = "project-1",
                     name = "OLM Stub Server",
-                    source = LocalSource(path = "/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs"),
+                    source = LocalSource(path = Directory("/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs")),
                     tasks = listOf(
                         Maven(
                             id = "task-1",
