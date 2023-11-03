@@ -46,6 +46,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("com.ingenifi:infera:1.0.0")
 
+    implementation("org.drools:drools-tms:8.33.0.Final")
+
+
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

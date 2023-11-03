@@ -1,5 +1,8 @@
 package com.kohls.pws
 
+import com.ingenifi.engine.ClasspathResource
+import com.kohls.pws.tasks.ConfirmationException
+
 data class Workspace(override val id: String, var projects: List<Project>) : Entity<Workspace> {
     fun execute() {
         createRunbook().execute()
@@ -26,6 +29,12 @@ data class Workspace(override val id: String, var projects: List<Project>) : Ent
     }
 
     override fun compile(lookupTable: LookupTable): Workspace = apply { projects = projects.map { it.compile(lookupTable) } }
+
+    override fun confirm(): Workspace {
+        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/workspace.drl"))).run<Workspace, ConfirmationException.Error>(this)
+        if (errors.isNotEmpty()) throw ConfirmationException(message = "Confirmation failed for workspace $id", errors = errors)
+        return this
+    }
 }
 
 

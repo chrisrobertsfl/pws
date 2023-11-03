@@ -1,0 +1,33 @@
+package com.kohls.pws;
+
+import com.kohls.pws.Workspace;
+import com.kohls.pws.Project;
+import com.kohls.pws.tasks.ConfirmationException.Error;
+
+// Declare a type to represent a potentially missing dependency
+declare MissingDependency
+    workspaceId : String
+    projectId : String
+    projectName : String
+    dependencyName : String
+end
+
+
+// Rule to identify all potential missing dependencies within the workspace
+rule "Identify Potential Missing Dependencies"
+when
+    $workspace : Workspace($projects : projects)
+    $project : Project($id: id, $name : name, $dependencies : dependencies) from $projects
+    $dependency : String() from $dependencies
+then
+    insert(new MissingDependency($workspace.getId(), $id, $name, $dependency));
+end
+
+rule "Confirm Missing Dependencies"
+when
+    $workspace : Workspace($projects : projects)
+    $missingDependency : MissingDependency(workspaceId == $workspace.getId(), $projectId : projectId, $projectName : projectName, $dependencyName : dependencyName)
+    not Project(name == $dependencyName, $projects contains this)
+then
+    insertLogical(new Error("Missing dependency '%s' for Project[id : '%s', name : '%s']", $dependencyName, $projectId, $projectName));
+end

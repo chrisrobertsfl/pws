@@ -47,5 +47,8 @@ data class Maven(
 }
 
 class ConfirmationException(val errors: List<Error>, message: String) : Exception(message) {
-    data class Error(val text: String)
+    data class Error(val text: String) {
+        constructor(format: String, vararg args: Any?) : this(format.format(*args))
+    }
+
 }
