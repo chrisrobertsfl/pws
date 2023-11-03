@@ -1,0 +1,32 @@
+package com.kohls.pws.tasks
+
+import com.kohls.pws.tasks.ConfirmationException.Error;
+
+rule "Settings Xml file is not present"
+when
+    Maven( settingsXmlFilePath == null )
+then
+    insert( new Error("Missing Maven settings.xml file") );
+ end
+
+rule "Settings Xml file is not does not exist"
+when
+    Maven( path : settingsXmlFilePath, settingsXmlFilePath != null, !settingsXmlFilePath.exists() )
+then
+    insert(new Error("Maven settings.xml file could not be found:  " + path.getAbsolutePath()));
+ end
+
+rule "Pom Xml file is not present"
+when
+    Maven( pomXmlFilePath == null )
+then
+    insert( new Error("Missing Maven pom.xml file") );
+ end
+
+rule "Pom file is not does not exist"
+when
+    Maven( path : pomXmlFilePath, pomXmlFilePath != null, !pomXmlFilePath.exists() )
+then
+    insert(new Error("Maven pom.xml file could not be found:  " + path.getAbsolutePath()));
+ end
+

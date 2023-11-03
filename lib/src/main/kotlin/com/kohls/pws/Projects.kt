@@ -9,9 +9,7 @@ data class Project(
         else -> throw IllegalArgumentException("Need to deal with unknown source")
     }
 
-    override fun compile(lookupTable: LookupTable): Project {
-        return this.copy(tasks = tasks.map{ it.compile(lookupTable)})
-    }
+    override fun compile(lookupTable: LookupTable): Project = this.copy(tasks = tasks.map { it.compile(lookupTable) })
 }
 
 class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("project")) {
@@ -21,11 +19,7 @@ class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("proje
     var parallel: Boolean = false
     val dependencies: MutableList<String> = mutableListOf()
 
-    fun build(): Project {
-        return Project(
-            name = name, source = source, tasks = tasks, parallel = parallel, dependencies = dependencies, id = idGenerator.generate()
-        )
-    }
+    fun build() = Project(name = name, source = source, tasks = tasks, parallel = parallel, dependencies = dependencies, id = idGenerator.generate())
 
     fun gitSource(url: String, branch: String, directory: String): Unit {
         source = GitSource(url, branch, directory)
@@ -35,19 +29,12 @@ class ProjectBuilder(var idGenerator: IdGenerator = IdGenerator.Universal("proje
         this.source = LocalSource(path)
     }
 
-    inline fun <reified T : TaskBuilder> task(
-        idGenerator: IdGenerator,
-        noinline block: T.() -> Unit
-    ) {
-        // Find the constructor that takes an IdGenerator as the only argument
+    inline fun <reified T : TaskBuilder> task(idGenerator: IdGenerator, noinline block: T.() -> Unit) {
         val constructor = T::class.java.getDeclaredConstructor(IdGenerator::class.java)
-        // Create a new instance of T using the constructor with idGenerator
         val taskBuilder = constructor.newInstance(idGenerator)
         taskBuilder.block()
         tasks += taskBuilder.build()
     }
-
-
 
     fun dependencies(builder: DependenciesBuilder.() -> Unit) {
         val dependenciesBuilder = DependenciesBuilder().apply(builder)

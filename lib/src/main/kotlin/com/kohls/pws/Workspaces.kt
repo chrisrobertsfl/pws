@@ -1,6 +1,6 @@
 package com.kohls.pws
 
-data class Workspace(override val id : String , var projects: List<Project>) : Entity<Workspace> {
+data class Workspace(override val id: String, var projects: List<Project>) : Entity<Workspace> {
     fun execute() {
         createRunbook().execute()
     }
@@ -25,22 +25,15 @@ data class Workspace(override val id : String , var projects: List<Project>) : E
         return Runbook(executionOrder)
     }
 
-    override fun compile(lookupTable: LookupTable): Workspace {
-        return apply {
-            projects = projects.map { it.compile(lookupTable) }
-        }
-    }
+    override fun compile(lookupTable: LookupTable): Workspace = apply { projects = projects.map { it.compile(lookupTable) } }
 }
 
 
-class WorkspaceBuilder(private val idGenerator : IdGenerator = IdGenerator.Universal("workspace")) {
+class WorkspaceBuilder(private val idGenerator: IdGenerator = IdGenerator.Universal("workspace")) {
     val projectBuilders: MutableList<ProjectBuilder> = mutableListOf()
-    fun build(): Workspace {
-        val builtProjects = projectBuilders.map { it.build() }
-        return Workspace(id = idGenerator.generate(), projects = builtProjects)
-    }
+    fun build() = Workspace(id = idGenerator.generate(), projects = projectBuilders.map { it.build() })
 
-    fun project(name: String, parallel: Boolean = false, projectIdGenerator : IdGenerator, block: ProjectBuilder.() -> Unit) {
+    fun project(name: String, parallel: Boolean = false, projectIdGenerator: IdGenerator, block: ProjectBuilder.() -> Unit) {
         projectBuilders += ProjectBuilder(projectIdGenerator).apply {
             this.name = name
             this.parallel = parallel

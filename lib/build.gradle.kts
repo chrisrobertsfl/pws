@@ -18,7 +18,7 @@ plugins {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
+    mavenLocal()
     mavenCentral()
 }
 
@@ -32,6 +32,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:${kotestVersion}") // replace with the latest version
     testImplementation("io.kotest:kotest-property:${kotestVersion}") // replace with the latest version
 
+    // Mockito
+    testImplementation("org.mockito:mockito-core:5.6.0")
+
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api("org.apache.commons:commons-math3:3.6.1")
@@ -41,6 +44,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("com.ingenifi:infera:1.0.0")
 
 }
 

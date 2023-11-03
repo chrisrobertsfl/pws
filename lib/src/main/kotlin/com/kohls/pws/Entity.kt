@@ -2,7 +2,7 @@ package com.kohls.pws
 
 import java.util.*
 
-interface Entity<T> : IsCompilable<T>, HasIdentity
+interface Entity<T> : IsCompilable<T>, IsConfirmable<T>, HasIdentity
 
 interface HasIdentity {
     val id: String
@@ -10,6 +10,10 @@ interface HasIdentity {
 
 interface IsCompilable<T> {
     fun compile(lookupTable: LookupTable): T
+}
+
+interface IsConfirmable<T> {
+    fun confirm() : T = TODO("Need to implment")
 }
 
 interface IdGenerator {
@@ -22,3 +26,4 @@ interface IdGenerator {
         }
     }
 }
+

@@ -1,6 +1,10 @@
 package com.kohls.pws.tasks
 
+import com.ingenifi.engine.ClasspathResource
+import com.ingenifi.engine.Engine
+import com.ingenifi.engine.Option.*
 import com.kohls.pws.*
+import com.kohls.pws.tasks.ConfirmationException.Error
 import org.slf4j.LoggerFactory.getLogger
 import java.io.File
 
@@ -36,4 +40,15 @@ data class Maven(
             settingsXmlFilePath = settingsXmlFilePath ?: File("$projectSourcePath/settings.xml")
         }
     }
+
+    override fun confirm(): Task {
+        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/task.drl")))
+            .run<Task, Error>(this)
+        if (errors.isNotEmpty()) throw ConfirmationException(message = "Confirmation failed for task $id", errors = errors)
+        return this
+    }
+}
+
+class ConfirmationException(val errors: List<Error>, message: String) : Exception(message) {
+    data class Error(val text: String)
 }

@@ -6,9 +6,7 @@ import java.lang.Thread.sleep
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-data class Eventually(
-    val condition: () -> Boolean
-) {
+data class Eventually(val condition: () -> Boolean) {
     fun satisfiedWithin(duration: Duration, interval: Duration = 500.milliseconds): Boolean {
         val end = currentTimeMillis() + duration.inWholeMilliseconds
 
