@@ -19,7 +19,7 @@ data class Maven(
 
     lateinit var bashScript: BashScript
     override fun initialize() {
-        bashScript = BashScriptFactory.fromResource(resourcePath = "/bash-scripts/new-maven-command.sh", background = background, variables = variables)
+        bashScript = BashScriptFactory.fromResource(resourcePath = "/bash-scripts/maven.sh", background = background, variables = variables)
     }
 
     override fun perform(): Boolean {
