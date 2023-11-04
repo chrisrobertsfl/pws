@@ -12,8 +12,6 @@ declare MissingDependency
     dependencyName : String
 end
 
-
-// Rule to identify all potential missing dependencies within the workspace
 rule "Identify Potential Missing Dependencies"
 when
     $workspace : Workspace($projects : projects)

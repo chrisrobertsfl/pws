@@ -1,0 +1,51 @@
+package com.kohls.pws;
+
+import com.kohls.pws.Workspace;
+import com.kohls.pws.Project;
+import com.kohls.pws.tasks.ConfirmationException.Error;
+import java.util.List;
+import java.util.ArrayList;
+
+// Declaration of types used for circular dependency detection
+declare ProjectNode
+    workspaceId : String
+    projectId : String
+    projectName : String
+    dependencies : List<String>
+    visitedProjects : List<String>
+end
+
+declare CircularDependencyError
+    workspaceId : String
+    projectId : String
+    projectName : String
+    circularPath : List<String>
+end
+
+// Rule to identify and process dependencies
+rule "Process Dependencies"
+when
+    $workspace : Workspace($id : id, $projects : projects)
+    $node : ProjectNode(workspaceId == $id, $projectId : projectId, $projectName : projectName, $dependencies : dependencies, $visitedProjects : visitedProjects)
+    $dependency : String() from $dependencies
+    $projectDependency : Project($dependencyId : id, name == $dependency, $dependencyDependencies : dependencies) from $projects
+    // Ensure that we do not already have this dependency in our path
+    ProjectNode(projectId == $dependencyId, workspaceId == $id, visitedProjects not contains $dependency) from $projects
+then
+    List<String> newPath = new ArrayList<String>($visitedProjects);
+    newPath.add($projectName);
+    // Update the visited projects of the dependency node
+    modify($node) { setVisitedProjects(newPath) };
+end
+
+// Rule to detect circular dependency based on matching project name in visitedProjects
+rule "Detect Circular Dependency"
+when
+    $workspace : Workspace($id : id)
+    $node : ProjectNode(workspaceId == $id, $projectId : projectId, $projectName : projectName, $dependencies : dependencies, visitedProjects contains $projectName)
+then
+    List<String> circularPath = new ArrayList<String>($node.getVisitedProjects());
+    circularPath.add($projectName);
+    insertLogical(new CircularDependencyError($id, $projectId, $projectName, circularPath));
+end
+

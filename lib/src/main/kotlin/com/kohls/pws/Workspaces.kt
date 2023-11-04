@@ -1,6 +1,6 @@
 package com.kohls.pws
 
-import com.ingenifi.engine.ClasspathResource
+import com.kohls.base.DependencyGraph
 import com.kohls.pws.tasks.ConfirmationException
 
 data class Workspace(override val id: String, var projects: List<Project>) : Entity<Workspace> {
@@ -31,10 +31,39 @@ data class Workspace(override val id: String, var projects: List<Project>) : Ent
     override fun compile(lookupTable: LookupTable): Workspace = apply { projects = projects.map { it.compile(lookupTable) } }
 
     override fun confirm(): Workspace {
-        val errors = ConfirmationEngine(ruleResources = listOf(ClasspathResource("rules/workspace.drl"))).run<Workspace, ConfirmationException.Error>(this)
-        if (errors.isNotEmpty()) throw ConfirmationException(message = "Confirmation failed for workspace $id", errors = errors)
+        val graph = createGraphOfDependencies()
+        val orphanedDependencies = detectOrphanedDependencies(graph)
+        val missingProjectNames = formatMissingProjectNames(orphanedDependencies)
+        missingProjectNames?.let {
+            throw ConfirmationException(
+                message = "Confirmation failed for $id", errors = listOf(ConfirmationException.Error(text = "Missing projects: names $it"))
+            )
+        }
+        val cycle = graph.findCycle()
+        val circularReferencingProjectNames = cycle.takeIf { it.isNotEmpty() }?.sorted()?.joinToString(prefix = "[", separator = ", ", postfix = "]") { "'$it'" }
+        circularReferencingProjectNames?.let {
+            throw ConfirmationException(
+                message = "Confirmation failed for $id", errors = listOf(ConfirmationException.Error(text = "Circular referencing projects: names $it"))
+            )
+        }
+        val duplicateProjects = findDuplicateProjectNames()
+        val duplicateProjectNames = duplicateProjects.takeIf { it.isNotEmpty() }?.sorted()?.joinToString(prefix = "[", separator = ", ", postfix = "]") { "'$it'" }
+        duplicateProjectNames?.let {
+            throw ConfirmationException(
+                message = "Confirmation failed for $id", errors = listOf(ConfirmationException.Error(text = "Duplicate projects: names $it"))
+            )
+        }
         return this
     }
+    private fun findDuplicateProjectNames(): Set<String> = projects.groupingBy { it.name }.eachCount().filter { it.value > 1 }.keys
+
+
+    private fun formatMissingProjectNames(orphanedDependencies: Set<String>) =
+        orphanedDependencies.takeIf { it.isNotEmpty() }?.sorted()?.joinToString(prefix = "[", separator = ", ", postfix = "]") { "'${it}'" }
+
+    private fun detectOrphanedDependencies(graph: DependencyGraph) = graph.findSinks()
+    private fun createGraphOfDependencies() = DependencyGraph(adjacencyMap = createAdjacencyMapFromProjects())
+    private fun createAdjacencyMapFromProjects() = projects.associate { it.name to it.dependencies }
 }
 
 
