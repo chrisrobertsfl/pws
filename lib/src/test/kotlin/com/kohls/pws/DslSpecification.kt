@@ -9,21 +9,23 @@ import io.kotest.matchers.shouldBe
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
-data class CountingGenerator(val prefix : String, var counter : Int = 0) : IdGenerator {
-    override fun generate(): String = "$prefix-${++counter}"
-}
 
 // TODO:  Need to perform things in phases:
 // phase 1:  compose
 // phase 2:  compile
 // phase 3:  confirm
-class NewDslSpecification : StringSpec({
+class DslSpecification : StringSpec({
+
+    data class CountingGenerator(val prefix: String, var counter: Int = 0) : IdGenerator {
+        override fun generate(): String = "$prefix-${++counter}"
+    }
+
     afterTest {
         killPatterns("exec:java")
     }
     val workspaceIdGenerator = CountingGenerator("workspace")
-    val projectIdGenerator =  CountingGenerator("project")
-    val taskIdGenerator =  CountingGenerator("task")
+    val projectIdGenerator = CountingGenerator("project")
+    val taskIdGenerator = CountingGenerator("task")
 
     val workspace = workspace(workspaceIdGenerator) {
 //        project("OLM Shared Utilities") {
@@ -72,8 +74,7 @@ class NewDslSpecification : StringSpec({
         workspace.projects shouldHaveSize 1
 
         workspace shouldBe Workspace(
-            id = "workspace-1",
-            projects = listOf(
+            id = "workspace-1", projects = listOf(
 ////                Project(
 ////                    name = "OLM Shared Utilities", source = GitSource(url = "git@gitlab.com:kohls/scps/scf/olm/olm-shared-utils.git", branch = "main", directory = "/tmp/workspace/olm-shared-utils")
 ////                ),
@@ -117,11 +118,6 @@ class NewDslSpecification : StringSpec({
     }
 })
 
-fun workspace(workspaceIdGenerator: IdGenerator = IdGenerator.Universal("workspace"), block: WorkspaceBuilder.() -> Unit): Workspace {
-    val workspace = WorkspaceBuilder(workspaceIdGenerator).apply(block).build()
-    val lookupTable = LookupTable(workspace)
 
-    return workspace.compile(lookupTable = lookupTable)
-}
 
 

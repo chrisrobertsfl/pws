@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
 
-class LookupSpecification : StringSpec({
+class LookupTableSpecification : StringSpec({
     "Make look up the project source by a specific task" {
         val task = Maven(
             id = "task-1",

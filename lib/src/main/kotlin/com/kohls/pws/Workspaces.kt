@@ -3,6 +3,13 @@ package com.kohls.pws
 import com.kohls.base.DependencyGraph
 import com.kohls.pws.tasks.ConfirmationException
 
+fun workspace(workspaceIdGenerator: IdGenerator = IdGenerator.Universal("workspace"), block: WorkspaceBuilder.() -> Unit): Workspace {
+    val workspace = WorkspaceBuilder(workspaceIdGenerator).apply(block).build()
+    val lookupTable = LookupTable(workspace)
+    return workspace.compile(lookupTable = lookupTable)
+}
+
+
 data class Workspace(override val id: String, var projects: List<Project>) : Entity<Workspace> {
     fun execute() {
         createRunbook().execute()

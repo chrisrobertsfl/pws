@@ -3,7 +3,7 @@ package com.kohls.pws
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 
-class WorkspaceBuilderTest : StringSpec({
+class WorkspaceBuilderSpecification : StringSpec({
     "should build a Workspace object with correct properties" {
         val projectBuilder1 = ProjectBuilder().apply {
             name = "Project1"
