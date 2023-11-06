@@ -14,6 +14,10 @@ import kotlin.time.Duration.Companion.seconds
 // phase 1:  compose
 // phase 2:  compile
 // phase 3:  confirm
+
+/**
+ *
+ */
 class DslSpecification : StringSpec({
 
     data class CountingGenerator(val prefix: String, var counter: Int = 0) : IdGenerator {

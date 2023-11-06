@@ -128,4 +128,68 @@ class DependencyGraphSpecification : FeatureSpec({
             }
         }
     }
+
+    feature("DFS Visits:") {
+        scenario("Pre-order traversal should visit nodes before their descendants") {
+            val graphData = mapOf("a" to listOf("b", "c"), "b" to listOf("d"), "c" to listOf("e"))
+            val graph = DependencyGraph(graphData)
+            val visitOrder = mutableListOf<String>()
+
+            graph.dfsVisit("a", TraversalType.PRE_ORDER) { visitOrder.add(it) }
+
+            val expectedOrder = listOf("a", "b", "d", "c", "e")
+            visitOrder shouldBe expectedOrder
+        }
+        scenario("Post-order traversal should visit nodes after their descendants") {
+            val graphData = mapOf("a" to listOf("b", "c"), "b" to listOf("d"), "c" to listOf("e"))
+            val graph = DependencyGraph(graphData)
+            val visitOrder = mutableListOf<String>()
+
+            graph.dfsVisit("a", TraversalType.POST_ORDER) { visitOrder.add(it) }
+
+            val expectedOrder = listOf("d", "b", "e", "c", "a")
+            visitOrder shouldBe expectedOrder
+        }
+
+        scenario("Reverse post order traversal") {
+            val graphData = mapOf("a" to listOf("b", "c"), "b" to listOf("d"), "c" to listOf("e"))
+            val graph = DependencyGraph(graphData)
+            val visitOrder = mutableListOf<String>()
+
+            // Start the DFS from 'a'
+            graph.dfsVisit("a", TraversalType.REVERSE_POST_ORDER) { node ->
+                // This will capture the reverse post-order traversal of the DFS
+                visitOrder.add(node)
+            }
+
+            // The expected order should be the reverse of a post-order traversal.
+            val expectedOrder = listOf("a", "c", "e", "b", "d")
+            visitOrder shouldBe expectedOrder
+        }
+
+        scenario("In-order traversal") {
+            val graphData = mapOf(
+                "a" to listOf("b", "c"),
+                "b" to listOf("d", "e"),
+                "c" to listOf("f", "g"),
+                "d" to listOf("h"),
+                "e" to listOf(), // Explicitly declare empty children lists for leaves if necessary
+                "f" to listOf(),
+                "g" to listOf("i", "j"),
+                "h" to listOf(),
+                "i" to listOf(),
+                "j" to listOf()
+            )
+            val graph = DependencyGraph(graphData)
+            val visitOrder = mutableListOf<String>()
+
+            graph.dfsVisit("a", TraversalType.IN_ORDER) { node ->
+                visitOrder.add(node)
+            }
+
+            val expectedOrder = listOf("h", "d", "b", "e", "a", "f", "c", "i", "g", "j")
+            visitOrder shouldBe expectedOrder
+        }
+
+    }
 })
