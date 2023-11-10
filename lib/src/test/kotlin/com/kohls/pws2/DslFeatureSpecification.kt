@@ -12,7 +12,7 @@ class DslFeatureSpecification : FeatureSpec({
         scenario("creating a simple workspace with one project") {
             workspace("workspace") {
                 project("project")
-            } shouldBe Workspace("workspace", setOf(Project("project")))
+            } shouldBe Workspace("workspace", mutableMapOf("project" to Project("project")))
         }
     }
 
@@ -36,11 +36,11 @@ class DslFeatureSpecification : FeatureSpec({
 
                 }
             } shouldBe Workspace(
-                "complex-workspace", projects = setOf(
-                    Project(
+                "complex-workspace", projects = mutableMapOf(
+                    "complex" to Project(
                         "complex",
                         setOf(ProjectDependency("projectA"), ProjectDependency("projectB")),
-                        setOf(Maven("complex build", goals = mutableListOf("clean")), NoOp("another", dependencies = setOf(ActionDependency("complex build"))))
+                        mapOf("complex build" to Maven("complex build", goals = mutableListOf("clean")), "another" to NoOp("another", dependencies = setOf(ActionDependency("complex build"))))
                     )
                 )
             )
@@ -48,17 +48,3 @@ class DslFeatureSpecification : FeatureSpec({
     }
 })
 
-fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {
-    return WorkspaceConfig(name).apply(block).configure()
-}
-
-data class Workspace(val name: String, val projects: Set<Project> = emptySet())
-
-data class WorkspaceConfig(val name: String) {
-    val projects = mutableSetOf<Project>()
-    fun configure() = Workspace(name, projects)
-
-    fun project(name: String, block: ProjectConfig.() -> Unit = {}) {
-        projects += ProjectConfig(name).apply(block).configure()
-    }
-}

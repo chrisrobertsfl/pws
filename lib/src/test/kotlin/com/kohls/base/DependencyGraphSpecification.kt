@@ -192,4 +192,43 @@ class DependencyGraphSpecification : FeatureSpec({
         }
 
     }
+
+    feature("Find disconnected graphs:") {
+        scenario("Two disconnected graphs") {
+            val graphData = mapOf("a" to listOf("b"), "b" to listOf("c"), "e" to listOf("f"))
+            val graphs = DependencyGraph(graphData).findAllGraphs()
+            println("graphs = ${graphs}")
+
+            graphs.size shouldBe 2
+            // Further assertions can be added to check the contents of each graph
+        }
+
+        scenario("Single connected graph") {
+            val graphData = mapOf("a" to listOf("b"), "b" to listOf("c"), "c" to listOf("a"))
+            val graphs = DependencyGraph(graphData).findAllGraphs()
+            println("graphs = ${graphs}")
+            graphs.size shouldBe 1
+        }
+
+        scenario("Multiple complex disconnected graphs") {
+            val graphData = mapOf(
+                "a" to listOf("b"), "b" to listOf("c"), "d" to listOf("e"),
+                "f" to listOf("g"), "h" to listOf("i"), "i" to listOf("h")
+            )
+            val graphs = DependencyGraph(graphData).findAllGraphs()
+            println("graphs = ${graphs}")
+
+            graphs.size shouldBe 4
+        }
+
+        scenario("Empty graph") {
+            val graphData = mapOf<String, List<String>>()
+            val graphs = DependencyGraph(graphData).findAllGraphs()
+            println("graphs = ${graphs}")
+
+            graphs.size shouldBe 0
+        }
+        // Additional scenarios can be added as needed
+    }
+
 })

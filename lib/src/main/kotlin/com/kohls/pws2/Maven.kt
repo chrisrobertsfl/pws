@@ -8,8 +8,4 @@ data class Maven(override val name: String, override var dependencies: Set<Actio
     fun goals(vararg goals : String) {
         this.goals.addAll(goals)
     }
-
-    override fun execute() {
-        // No operation
-    }
 }

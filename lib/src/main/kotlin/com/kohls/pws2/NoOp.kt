@@ -4,7 +4,4 @@ data class NoOp(override val name: String, override var dependencies: Set<Action
     fun dependsOn(name: String) {
         dependencies += ActionDependency(name)
     }
-    override fun execute() {
-        // No operation
-    }
 }

@@ -1,6 +1,7 @@
 package com.kohls.pws
 
 import com.ingenifi.engine.ClasspathResource
+import com.kohls.base.Directory
 import com.kohls.pws.tasks.ConfirmationException
 
 data class Project(

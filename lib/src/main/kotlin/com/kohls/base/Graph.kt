@@ -11,7 +11,7 @@ enum class TraversalType {
     REVERSE_POST_ORDER
 }
 
-class DependencyGraph(private val adjacencyMap: Map<String, List<String>>) {
+data class DependencyGraph(private val adjacencyMap: Map<String, List<String>>) {
     private fun createGuavaGraph(): MutableGraph<String> {
         val graph: MutableGraph<String> = GraphBuilder.directed().allowsSelfLoops(true).build()
         adjacencyMap.forEach { (node, neighbors) ->
@@ -48,6 +48,28 @@ class DependencyGraph(private val adjacencyMap: Map<String, List<String>>) {
             if (!visited.contains(node) && dfs(node)) return cycle
         }
         return emptySet()
+    }
+
+    private fun findSourceNodes(): Set<String> {
+        val allNeighbors = adjacencyMap.values.flatten().toSet()
+        // Source nodes are those present in keys but not as neighbors
+        return adjacencyMap.keys.filter { it !in allNeighbors }.toSet()
+    }
+
+    fun findMostDependentNode(): String {
+        var lastVisited = ""
+        val visited = mutableSetOf<String>()
+        val sourceNodes = findSourceNodes()
+
+        fun dfs(node: String) {
+            if (node in visited) return
+            visited.add(node)
+            adjacencyMap[node]?.forEach(::dfs)
+            lastVisited = node // The last visited node in post-order will be the most dependent one
+        }
+
+        sourceNodes.forEach(::dfs)
+        return lastVisited
     }
 
     fun findCycle(): Set<String> {
@@ -104,6 +126,33 @@ class DependencyGraph(private val adjacencyMap: Map<String, List<String>>) {
         } else if (traversalType == TraversalType.POST_ORDER) {
             exitList.forEach(visit)
         }
+    }
+
+    fun findAllGraphs(): List<DependencyGraph> {
+        val visited = mutableSetOf<String>()
+
+        fun bfs(startNode: String): Map<String, List<String>> {
+            val subgraph = mutableMapOf<String, List<String>>()
+            val queue = ArrayDeque<String>()
+            queue.add(startNode)
+
+            while (queue.isNotEmpty()) {
+                val node = queue.removeFirst()
+                if (node !in visited) {
+                    visited.add(node)
+                    val neighbors = adjacencyMap[node] ?: emptyList()
+                    subgraph[node] = neighbors
+                    queue.addAll(neighbors.filterNot { it in visited })
+                }
+            }
+
+            return subgraph
+        }
+
+        return adjacencyMap.keys.filterNot { it in visited }
+            .mapNotNull { startNode ->
+                bfs(startNode).takeIf { it.isNotEmpty() }?.let { DependencyGraph(it) }
+            }
     }
 
 }

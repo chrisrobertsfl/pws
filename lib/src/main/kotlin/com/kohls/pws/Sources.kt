@@ -1,5 +1,7 @@
 package com.kohls.pws
 
+import com.kohls.base.Directory
+
 sealed interface Source {
     val path: Directory
 }
