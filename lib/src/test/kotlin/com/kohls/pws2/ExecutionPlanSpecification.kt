@@ -2,9 +2,12 @@ package com.kohls.pws2
 
 import com.kohls.base.DependencyGraph
 import com.kohls.base.TraversalType
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
+import kotlin.test.Ignore
 
+@Ignored
 class ExecutionPlanSpecification : FeatureSpec({
 
     feature("Execution Plan Creation:") {

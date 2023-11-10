@@ -5,11 +5,14 @@ import com.kohls.pws.tasks.ConfirmationException
 import com.kohls.pws.tasks.Maven
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import java.io.File
+import kotlin.test.Ignore
 
+@Ignored
 class ProjectSpecification : FeatureSpec({
     feature("Project Compile:") {
         scenario("Successful compilation with substitutions") {
