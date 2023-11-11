@@ -1,6 +1,6 @@
 package com.kohls.pws2
 
-import com.kohls.pws.nonExistingDirectory
+import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import org.mockito.Mockito.mock

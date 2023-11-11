@@ -9,7 +9,7 @@ fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {
     return WorkspaceConfig(name).apply(block).configure()
 }
 
-data class Workspace(val name: String = randomUUID().toString(), val projects: List<Project> = emptyList(), val logger : Logger = LoggerFactory.getLogger(com.kohls.pws.Workspace::class.java)) {
+data class Workspace(val name: String = randomUUID().toString(), val projects: List<Project> = emptyList(), val logger : Logger = LoggerFactory.getLogger(Workspace::class.java)) {
     fun execute() = try {
         for (project in projects) {
             for (action in project.actions) {

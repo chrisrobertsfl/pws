@@ -3,7 +3,7 @@ package com.kohls.pws2.scripting
 import com.kohls.base.killPatterns
 import com.kohls.base.multilinePrint
 import com.kohls.base.Eventually
-import com.kohls.pws.existingFile
+import com.kohls.base.existingFile
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import org.mockito.Mockito.mock

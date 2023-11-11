@@ -1,6 +1,6 @@
 package com.kohls.pws2
 
-import com.kohls.pws.existingDirectory
+import com.kohls.base.existingDirectory
 import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
