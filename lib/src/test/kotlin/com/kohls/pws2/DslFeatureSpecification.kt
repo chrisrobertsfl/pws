@@ -1,7 +1,11 @@
 package com.kohls.pws2
 
+import com.kohls.pws.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.slf4j.Logger
 
 class DslFeatureSpecification : FeatureSpec({
     feature("Simple workspace creation using DSL") {
@@ -12,7 +16,7 @@ class DslFeatureSpecification : FeatureSpec({
         scenario("creating a simple workspace with one project") {
             workspace("workspace") {
                 project("project")
-            } shouldBe Workspace("workspace", mutableMapOf("project" to Project("project")))
+            } shouldBe Workspace("workspace", listOf(Project("project")))
         }
     }
 
@@ -22,28 +26,32 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.register(Maven::class) { name -> Maven(name) }
             ActionRegistry.register(NoOp::class) { name -> NoOp(name) }
         }
+
         scenario("creating a complex project") {
             workspace("complex-workspace") {
                 project("complex") {
                     action<Maven>("complex build") {
                         goals("clean")
                     }
-                    action<NoOp>("another") {
-                        dependsOn("complex build")
-                    }
-                    dependsOn("projectA")
-                    dependsOn("projectB")
-
+                    action<NoOp>("another")
                 }
             } shouldBe Workspace(
-                "complex-workspace", projects = mutableMapOf(
-                    "complex" to Project(
-                        "complex",
-                        setOf(ProjectDependency("projectA"), ProjectDependency("projectB")),
-                        mapOf("complex build" to Maven("complex build", goals = mutableListOf("clean")), "another" to NoOp("another", dependencies = setOf(ActionDependency("complex build"))))
+                "complex-workspace", projects = listOf(
+                    Project(
+                        "complex", listOf(Maven("complex build", goals = mutableListOf("clean")), NoOp("another"))
                     )
                 )
             )
+        }
+    }
+
+    feature("When something goes wrong, during execution") {
+        scenario("Directory for action does not exist") {
+            val action = ValidDirectoryExists(directory = nonExistingDirectory("/default/project"))
+            val project = Project(actions = listOf(action))
+            val workspace = Workspace(projects = listOf(project), logger = mock(Logger::class.java))
+            workspace.execute()
+            verify(workspace.logger).error("Invalid directory /default/project")
         }
     }
 })

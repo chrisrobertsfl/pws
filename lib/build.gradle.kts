@@ -36,6 +36,10 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.6.0")
 
 
+    // Utilities
+    testImplementation("org.apache.commons:commons-lang3:3.13.0")
+
+
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api("org.apache.commons:commons-math3:3.6.1")
 

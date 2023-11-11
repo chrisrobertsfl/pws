@@ -2,6 +2,7 @@ package com.kohls.pws
 
 import com.kohls.base.Directory
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import java.io.File
 
 
@@ -19,26 +20,28 @@ fun project(vararg names : String)  : Project {
 
 fun existingFile(): File {
     val file = Mockito.mock(File::class.java)
-    Mockito.`when`(file.exists()).thenReturn(true)
+    `when`(file.exists()).thenReturn(true)
     return file
 }
 
 fun nonExistingFile(path: String): File {
     val file = Mockito.mock(File::class.java)
-    Mockito.`when`(file.exists()).thenReturn(false)
-    Mockito.`when`(file.absolutePath).thenReturn(path)
+    `when`(file.exists()).thenReturn(false)
+    `when`(file.absolutePath).thenReturn(path)
     return file
 }
 
-fun existingDirectory(): Directory {
+fun existingDirectory(path : String = "/default/path"): Directory {
     val directory = Mockito.mock(Directory::class.java)
-    Mockito.`when`(directory.exists()).thenReturn(true)
+    `when`(directory.exists()).thenReturn(true)
+    `when`(directory.path).thenReturn(path)
+
     return directory
 }
 
 fun nonExistingDirectory(path: String): Directory {
     val directory = Mockito.mock(Directory::class.java)
-    Mockito.`when`(directory.exists()).thenReturn(false)
-    Mockito.`when`(directory.path).thenReturn(path)
+    `when`(directory.exists()).thenReturn(false)
+    `when`(directory.path).thenReturn(path)
     return directory
 }

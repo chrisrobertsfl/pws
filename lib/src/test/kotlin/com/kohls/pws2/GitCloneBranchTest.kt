@@ -1,26 +1,28 @@
 package com.kohls.pws2
 
 import com.kohls.base.Directory
+import com.kohls.pws.existingDirectory
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
+@Ignored
 class GitCloneBranchTest : StringSpec({
-
-    ".git directory exists for given parent directory" {
-        val parentDirectory = Directory("/Users/TKMA5QX/projects/pws")
-        parentDirectory.append(".git").exists() shouldBe true
-    }
-
-    "using action:  .git directory exists for given parent directory" {
-        val action = ValidDirectoryExists(name = ".git directory exists", path = "/Users/TKMA5QX/projects/pws/.git")
+    "git clone with branch" {
+        val action = GitCloneBranch(name = "Git clone branch", branchName = "OMO-1914", repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/store-fulfillment.git", targetDirectory = Directory("/tmp/store-fulfillment"))
         action.execute() shouldBe true
-
     }
 })
 
-data class ValidDirectoryExists(override val name : String, override val dependencies : Set<ActionDependency> = emptySet(), val path : String) : Action {
-    override fun execute(): Boolean {
-        return Directory(path).exists()
+data class GitCloneBranch(override val name : String, val branchName : String = "main", val repositoryUrl : String, val targetDirectory: Directory) : Action {
+    override fun execute() {
+//        val commandLine = buildCommandLine(branchName, repositoryUrl, targetDirectory.path)
+//        ProcessBuilder(commandLine)
     }
+
+//    private fun buildCommandLine(args: List<Any>): List<String> = listOf(file.path) + args.map { it.toString() }
+
+
+
 }
 
