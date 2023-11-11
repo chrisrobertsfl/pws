@@ -2,8 +2,7 @@ package com.kohls.pws2.scripting
 
 import com.kohls.base.killPatterns
 import com.kohls.base.multilinePrint
-import com.kohls.base.tempFileFromResource
-import com.kohls.pws.Eventually
+import com.kohls.base.Eventually
 import com.kohls.pws.existingFile
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
