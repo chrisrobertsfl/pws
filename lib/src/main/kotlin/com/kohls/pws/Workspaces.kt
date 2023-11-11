@@ -12,7 +12,7 @@ data class Workspace(val name: String = randomUUID().toString(), val projects: L
     fun execute() = try {
         for (project in projects) {
             for (action in project.actions) {
-                action.execute()
+                action.perform()
             }
         }
     } catch (exception : Exception) {

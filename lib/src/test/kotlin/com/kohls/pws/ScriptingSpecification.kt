@@ -81,7 +81,7 @@ class BashScriptSpecification : FeatureSpec({
 
         scenario("Execute the script for olm-stubs") {
             val executableScript = bashScript.createExecutableScript(background = true)
-            executableScript.execute("/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs/pom.xml", "/Users/TKMA5QX/data/repo/maven/settings.xml", "clean", "install", "exec:java")
+            executableScript.execute(listOf("/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs/pom.xml", "/Users/TKMA5QX/data/repo/maven/settings.xml", "clean", "install", "exec:java"))
             Eventually(condition = {
                 executableScript.logFile.validate { it.readText().contains("8080") }
             }).satisfiedWithin(duration = 10.seconds) shouldBe true

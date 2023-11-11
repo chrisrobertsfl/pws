@@ -71,5 +71,5 @@ fun tempFileFromResource(resourcePath: String): File = kotlin.io.path.createTemp
 
 val killPattern : ExecutableScript = BashScript(commandName = "kill-pattern", body = Body.fromResource("/bash-scripts/kill-pattern.sh")).createExecutableScript()
 fun killPatterns(vararg args : String) {
-    args.toList().forEach { killPattern.execute(it) }
+    args.toList().forEach { killPattern.execute(listOf(it)) }
 }

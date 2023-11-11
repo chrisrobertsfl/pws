@@ -20,7 +20,14 @@ fun interface ScriptRendering {
 data class ScriptFile(private val file: File) {
     fun contents(): String = file.readText()
     fun validate(predicate: (File) -> Boolean): Boolean = predicate(file)
-    fun commandLine(args: List<Any>): List<String> = listOf(fullPath()) + args.map { it.toString() }
+    fun commandLine(args: List<Any>): List<String> {
+        val commandLine = mutableListOf(fullPath())
+        for (arg in args) {
+            commandLine += arg.toString()
+        }
+        println("commandLine size is ${commandLine.size}")
+        return commandLine
+    }
 
     fun fullPath() = file.path
 }
@@ -52,9 +59,9 @@ data class LogFile(private val file: File) {
 data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, val background: Boolean = false) {
     private val logger : Logger = LoggerFactory.getLogger(ExecutableScript::class.java)
     fun scriptContents(): String = scriptFile.contents()
-    fun execute(vararg args: Any) = execute(args.toList())
 
     fun execute(args: List<Any>) = runCatching {
+        println("args (size = ${args.size}: $args")
         logger.info("Script is here :  ${scriptFile.fullPath()}")
         logger.info("Log is here    :  ${logFile.fullPath()}")
         val commandLine = scriptFile.commandLine(args)

@@ -9,7 +9,7 @@ import io.kotest.matchers.shouldBe
 class ValidationDirectoryExistsTest : StringSpec({
     "using action:  .git directory exists" {
         val action = ValidDirectoryExists(name = ".git directory exists", directory = existingDirectory("/some/path/.git"))
-        action.execute() shouldBe true
+        action.perform() shouldBe true
     }
 })
 

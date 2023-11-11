@@ -1,7 +1,11 @@
 package com.kohls.pws
 
-data class ActionDependency(val name: String)
+
 interface Action {
     val name: String
-    fun execute(): Unit = TODO("Need to implement")
+    fun perform(): Map<String, Any>  = TODO("Need to implement")
+
+    companion object {
+        val NO_FIELDS : Map<String, Any> = emptyMap()
+    }
 }
