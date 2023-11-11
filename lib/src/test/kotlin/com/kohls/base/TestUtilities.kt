@@ -1,9 +1,9 @@
 package com.kohls.base
 
 import com.google.common.io.Resources
-import com.kohls.pws2.scripting.BashScript
-import com.kohls.pws2.scripting.Body
-import com.kohls.pws2.scripting.ExecutableScript
+import com.kohls.pws.scripting.BashScript
+import com.kohls.pws.scripting.Body
+import com.kohls.pws.scripting.ExecutableScript
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.mockito.Mockito

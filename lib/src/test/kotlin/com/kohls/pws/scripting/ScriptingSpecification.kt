@@ -1,4 +1,4 @@
-package com.kohls.pws2.scripting
+package com.kohls.pws.scripting
 
 import com.kohls.base.killPatterns
 import com.kohls.base.multilinePrint

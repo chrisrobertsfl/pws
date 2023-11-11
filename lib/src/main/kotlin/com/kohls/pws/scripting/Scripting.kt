@@ -1,4 +1,4 @@
-package com.kohls.pws2.scripting
+package com.kohls.pws.scripting
 
 import kotlinx.coroutines.*
 import org.slf4j.Logger

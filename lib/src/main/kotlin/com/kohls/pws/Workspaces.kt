@@ -1,8 +1,7 @@
-package com.kohls.pws2
+package com.kohls.pws
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 import java.util.UUID.randomUUID
 
 fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {

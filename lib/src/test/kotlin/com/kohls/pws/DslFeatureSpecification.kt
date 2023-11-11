@@ -1,4 +1,4 @@
-package com.kohls.pws2
+package com.kohls.pws
 
 import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec

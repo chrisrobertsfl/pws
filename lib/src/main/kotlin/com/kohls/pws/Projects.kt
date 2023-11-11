@@ -1,6 +1,5 @@
-package com.kohls.pws2
+package com.kohls.pws
 
-import java.util.UUID
 import java.util.UUID.randomUUID
 
 data class ProjectDependency(val name: String)

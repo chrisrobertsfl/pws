@@ -1,4 +1,4 @@
-package com.kohls.pws2
+package com.kohls.pws
 
 import com.kohls.base.Directory
 import io.kotest.core.annotation.Ignored
