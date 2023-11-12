@@ -13,4 +13,10 @@ data class Directory(val path: String) {
         val childPathNoSlashes = childPath.dropWhile { it == '/' }
         return Directory("$path/$childPathNoSlashes")
     }
+
+
+
+    fun asFile(fileName: String): File {
+        return directoryPath.resolve(fileName)
+    }
 }

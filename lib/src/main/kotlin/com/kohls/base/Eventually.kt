@@ -18,4 +18,12 @@ data class Eventually(val condition: () -> Boolean) {
         }
         return false
     }
+
+    fun satisfiedWithinOrThrow(duration: Duration, interval: Duration = 500.milliseconds, message: String) {
+        when {
+            !satisfiedWithin(duration, interval) -> {
+                throw IllegalStateException(message)
+            }
+        }
+    }
 }
