@@ -14,6 +14,9 @@ class GitCloneBranchTest : StringSpec({
 })
 
 data class GitCloneBranch(override val name : String, val branchName : String = "main", val repositoryUrl : String, val targetDirectory: Directory) : Action {
+    override fun perform(parameters: Parameters): Parameters {
+        TODO("Not yet implemented")
+    }
 
 }
 

@@ -55,7 +55,6 @@ data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, va
     fun scriptContents(): String = scriptFile.contents()
 
     fun execute(args: List<Any>) = runCatching {
-        println("args (size = ${args.size}: $args")
         logger.info("Script is here :  ${scriptFile.fullPath()}")
         logger.info("Log is here    :  ${logFile.fullPath()}")
         val commandLine = scriptFile.commandLine(args)
