@@ -2,9 +2,13 @@ package com.kohls.pws
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
 import java.util.UUID.randomUUID
 
-fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {
+fun generateName() = randomUUID().toString()
+
+
+fun workspace(name: String = generateName(), block: WorkspaceConfig.() -> Unit = {}): Workspace {
     return WorkspaceConfig(name).apply(block).configure()
 }
 
@@ -25,7 +29,7 @@ data class WorkspaceConfig(val name: String) {
     private val projects = mutableListOf<Project>()
     fun configure() = Workspace(name, projects)
 
-    fun project(name: String, block: ProjectConfig.() -> Unit = {}) {
+    fun project(name: String = generateName(), block: ProjectConfig.() -> Unit = {}) {
         projects += ProjectConfig(name).apply(block).configure()
     }
 }

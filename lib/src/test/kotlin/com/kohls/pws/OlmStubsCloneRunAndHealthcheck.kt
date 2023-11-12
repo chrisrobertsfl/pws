@@ -2,10 +2,7 @@ package com.kohls.pws
 
 import com.kohls.base.Directory
 import com.kohls.base.killPatterns
-import com.kohls.pws.Action.Companion.generateName
 import io.kotest.core.spec.style.StringSpec
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
@@ -31,20 +28,4 @@ class OlmStubsCloneRunAndHealthcheck : StringSpec({
         killPatterns("exec:java")
     }
 })
-
-data class GitClone(override val name: String = generateName(), val repositoryUrl: String, val targetDirectory: Directory, val overwrite: Boolean = true) : Action {
-    private val logger: Logger = LoggerFactory.getLogger(Maven::class.java)
-    override fun perform(parameters: Parameters): Parameters {
-        if (targetDirectory.exists()) {
-            when (overwrite) {
-                true -> targetDirectory.delete()
-                false -> throw IllegalStateException("targetDirectory '${targetDirectory.path}' already exists and cannot be overwritten when overwrite is enabled")
-            }
-        }
-        val executableScript = BashScript(commandName = "git-clone", body = Body.fromResource("/bash-scripts/git-clone.sh")).createExecutableScript()
-        executableScript.execute(listOf(repositoryUrl, targetDirectory.path))
-        return Parameters.create("targetDirectory" to targetDirectory)
-    }
-
-}
 

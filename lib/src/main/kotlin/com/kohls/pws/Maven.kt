@@ -1,21 +1,21 @@
 package com.kohls.pws
 
 import com.kohls.base.Directory
-import com.kohls.pws.Action.Companion.generateName
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 
-data class Maven(override val name: String = generateName(), var pomXmlFile : File? = null, var settingsXmlFile : File? = null, val goals: MutableList<String> = mutableListOf()) : Action {
+
+// TODO:  Performance tuner:  executableScript can be created once?
+
+data class Maven(override val name: String = generateName(), var pomXmlFile : File? = null, var settingsXmlFile : File? = null, val goals: MutableList<String> = mutableListOf()) : Action  {
 
     private val logger : Logger = LoggerFactory.getLogger(Maven::class.java)
-    fun goals(vararg goals: String) {
-        this.goals.addAll(goals)
-    }
+
 
     override fun perform(parameters: Parameters): Parameters {
         logger.info("parameters are $parameters")
-        val executableScript = BashScript(commandName = "maven", body = Body.fromResource("/bash-scripts/bash-maven.sh")).createExecutableScript(background = true)
+        val executableScript = BashScript(commandName = "maven", body = Body.fromResource("/bash-scripts/maven.sh")).createExecutableScript(background = true)
         pomXmlFile = pomXmlFile ?: parameters.getOrThrow<Directory>("targetDirectory").asFile("pom.xml")
         val pomXmlFilePath : String = requireNotNull(pomXmlFile) { "Missing pomXmlFile" }.path
         val settingsXmlFilePath = requireNotNull(settingsXmlFile) { "Missing settingsXmlFile" }.path
@@ -24,4 +24,18 @@ data class Maven(override val name: String = generateName(), var pomXmlFile : Fi
         return Parameters.create("logFile" to executableScript.logFile)
     }
 
+    companion object {
+        fun configuration(name: String): ActionConfiguration<Maven> = MavenConfiguration(name)
+    }
+}
+
+data class MavenConfiguration(val name : String) : ActionConfiguration<Maven> {
+    val goals : MutableList<String> = mutableListOf()
+    override fun configure(): Maven {
+        TODO("Not yet implemented")
+    }
+
+    fun goals(vararg goals: String) {
+        this.goals.addAll(goals)
+    }
 }

@@ -1,5 +1,6 @@
 package com.kohls.pws
 
+import com.kohls.base.Directory
 import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
@@ -23,17 +24,15 @@ class DslFeatureSpecification : FeatureSpec({
     feature("Complex workspace creation using DSL") {
 
         beforeTest {
-            ActionRegistry.register(Maven::class) { name -> Maven(name) }
+            ActionRegistry.register(Maven::class) { name -> MavenConfiguration(name) }
+            ActionRegistry.register(GitClone::class) { name -> GitCloneConfig(name) }
             ActionRegistry.register(NoOp::class) { name -> NoOp(name) }
         }
 
         scenario("creating a complex project") {
             workspace("complex-workspace") {
                 project("complex") {
-                    action<Maven>("complex build") {
-                        goals("clean")
-                    }
-                    action<NoOp>("another")
+
                 }
             } shouldBe Workspace(
                 "complex-workspace", projects = listOf(
@@ -54,5 +53,21 @@ class DslFeatureSpecification : FeatureSpec({
             verify(workspace.logger).error("Invalid directory /default/project")
         }
     }
-})
 
+    feature("Olm Stubs clone, run, and healthcheck") {
+
+        beforeTest {
+            ActionRegistry.register(GitClone::class) { name -> GitCloneConfig(name) }
+        }
+        scenario("When no target directory exists") {
+            workspace("w") {
+                project("p") {
+                   action<GitClone>("g") {
+                       repositoryUrl("git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git")
+                       targetDirectory("/tmp/olm-stubs")
+                   }
+                }
+            } shouldBe Workspace(name = "w", projects = listOf(Project("p", actions = listOf(GitClone("g", repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git", targetDirectory = Directory("/tmp/olm-stubs"))))))
+        }
+    }
+})

@@ -3,7 +3,7 @@ package com.kohls.pws
 import com.kohls.base.Eventually
 import kotlin.time.Duration
 
-data class FileEventuallyContains(override val name: String = Action.generateName(), val duration: Duration, val searchedText : String ) : Action {
+data class FileEventuallyContains(override val name: String = generateName(), val duration: Duration, val searchedText : String ) : Action {
     override fun perform(parameters: Parameters): Parameters {
         val logFile =parameters.getOrThrow<LogFile>("logFile")
 

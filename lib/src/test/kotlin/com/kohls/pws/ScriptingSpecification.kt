@@ -17,7 +17,7 @@ class BashScriptSpecification : FeatureSpec({
         commandName = "maven",
         shebang = Shebang("/bin/bash"),
         environmentVariables = listOf(EnvironmentVariable("HTTPS_PROXY", "http://proxy.kohls.com:3128")),
-        body = Body.fromResource(resourcePath = "/bash-scripts/bash-maven.sh"),
+        body = Body.fromResource(resourcePath = "/bash-scripts/maven.sh"),
     )
 
     feature("Rendering Contents") {
