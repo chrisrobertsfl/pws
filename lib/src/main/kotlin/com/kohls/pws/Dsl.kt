@@ -1,5 +1,6 @@
 package com.kohls.pws
 
-object Dsl {
+import java.util.*
 
-}
+fun generateName() = UUID.randomUUID().toString()
+fun emptyString() = ""

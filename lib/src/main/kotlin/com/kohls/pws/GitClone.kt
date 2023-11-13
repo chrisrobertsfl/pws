@@ -3,7 +3,7 @@ package com.kohls.pws
 import com.kohls.base.Directory
 import org.slf4j.LoggerFactory
 
-data class GitClone(override val name: String = Action.generateName(), var overwrite: Boolean = true) : Action {
+data class GitClone(override val name: String = generateName(), var overwrite: Boolean = true) : Action {
     lateinit var repositoryUrl: String
     lateinit var targetDirectoryPath: String
     private val logger by lazy { LoggerFactory.getLogger(Maven::class.java) }

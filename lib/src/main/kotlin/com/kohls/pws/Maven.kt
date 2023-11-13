@@ -1,7 +1,6 @@
 package com.kohls.pws
 
 import com.kohls.base.Directory
-import com.kohls.pws.Action.Companion.generateName
 import org.slf4j.LoggerFactory
 
 data class Maven(override val name: String = generateName(), val goals: MutableList<String> = mutableListOf()) : Action {

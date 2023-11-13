@@ -4,9 +4,11 @@ import com.kohls.base.killPatterns
 import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
+import org.mockito.ArgumentMatchers.contains
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.slf4j.Logger
+import kotlin.time.Duration.Companion.seconds
 
 class DslFeatureSpecification : FeatureSpec({
 
@@ -24,11 +26,13 @@ class DslFeatureSpecification : FeatureSpec({
         beforeTest {
             ActionRegistry.register(GitClone::class) { name -> GitClone(name) }
             ActionRegistry.register(Maven::class) { name -> Maven(name) }
+            ActionRegistry.register(LogFileEventuallyContains::class) { name -> LogFileEventuallyContains(name) }
         }
 
         afterTest {
-            ActionRegistry.unregister(GitClone::class)
+            ActionRegistry.unregister(LogFileEventuallyContains::class)
             ActionRegistry.unregister(Maven::class)
+            ActionRegistry.unregister(GitClone::class)
             killPatterns("exec:java")
         }
 
@@ -59,6 +63,10 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "install"
                         goals += "exec:java"
                     }
+                    action<LogFileEventuallyContains>("l") {
+                        duration = 5.seconds
+                        searchedText = "INFO: Started Stub Server with port 8080"
+                    }
                 }
             }.execute()
         }
@@ -88,10 +96,8 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                 }
-            }.apply {
-                logger = mock(Logger::class.java)
             }
-            workspace.execute()
+            workspace.apply { logger = mock(Logger::class.java) }.execute()
             verify(workspace.logger).error("Missing pomXmlFilePath")
         }
 
@@ -108,10 +114,8 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                 }
-            }.apply {
-                logger = mock(Logger::class.java)
             }
-            workspace.execute()
+            workspace.apply { logger = mock(Logger::class.java) }.execute()
             verify(workspace.logger).error("Missing settingsXmlFilePath")
         }
 
@@ -127,15 +131,34 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                 }
-            }.apply {
-                logger = mock(Logger::class.java)
             }
-            workspace.execute()
+            workspace.apply { logger = mock(Logger::class.java) }.execute()
             verify(workspace.logger).error("Missing settingsXmlFilePath")
         }
 
-        afterTest {
-            ActionRegistry.unregister(GitClone::class)
+
+        scenario("Run it with everything specified - except time out quickly that that it cannot find log file searched text in time") {
+            val workspace = workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                    action<Maven>("m") {
+                        pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                    action<LogFileEventuallyContains>("l") {
+                        duration = 0.seconds
+                        searchedText = "INFO: Started Stub Server with port 8080"
+                    }
+                }
+            }
+            workspace.apply { logger = mock(Logger::class.java) }.execute()
+            verify(workspace.logger).error(contains("Could not find 'INFO: Started Stub Server with port 8080'"))
+
         }
     }
 

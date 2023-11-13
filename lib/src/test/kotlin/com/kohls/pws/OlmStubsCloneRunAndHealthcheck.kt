@@ -3,7 +3,6 @@ package com.kohls.pws
 import com.kohls.base.killPatterns
 import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.style.StringSpec
-import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 @Ignored
@@ -22,10 +21,10 @@ class OlmStubsCloneRunAndHealthcheck : StringSpec({
             //settingsXmlFile = File("/Users/TKMA5QX/data/repo/maven/settings.xml"),
             goals = mutableListOf("clean", "install", "exec:java"),
         )
-        val fileEventuallyContains = FileEventuallyContains(duration = 10.seconds, searchedText = "8080")
+        val logFileEventuallyContains = LogFileEventuallyContains(duration = 10.seconds, searchedText = "8080")
         var parameters = gitClone.perform()
         parameters = maven.perform(parameters)
-        fileEventuallyContains.perform(parameters)
+        logFileEventuallyContains.perform(parameters)
     }
 
     afterTest {
