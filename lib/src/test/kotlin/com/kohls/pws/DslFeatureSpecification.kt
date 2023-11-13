@@ -1,5 +1,6 @@
 package com.kohls.pws
 
+import com.kohls.base.killPatterns
 import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
@@ -8,42 +9,6 @@ import org.mockito.Mockito.verify
 import org.slf4j.Logger
 
 class DslFeatureSpecification : FeatureSpec({
-    feature("Simple workspace creation using DSL") {
-        scenario("creating a simple workspace with no projects") {
-            workspace("simple") shouldBe Workspace("simple")
-        }
-
-        scenario("creating a simple workspace with one project") {
-            workspace("workspace") {
-                project("project")
-            } shouldBe Workspace("workspace", listOf(Project("project")))
-        }
-    }
-
-    feature("Complex workspace creation using DSL") {
-
-        beforeTest {
-            ActionRegistry.register(Maven::class) { name -> Maven(name) }
-            ActionRegistry.register(NoOp::class) { name -> NoOp(name) }
-        }
-
-        scenario("creating a complex project") {
-            workspace("complex-workspace") {
-                project("complex") {
-                    action<Maven>("complex build") {
-                        goals("clean")
-                    }
-                    action<NoOp>("another")
-                }
-            } shouldBe Workspace(
-                "complex-workspace", projects = listOf(
-                    Project(
-                        "complex", listOf(Maven("complex build", goals = mutableListOf("clean")), NoOp("another"))
-                    )
-                )
-            )
-        }
-    }
 
     feature("When something goes wrong, during execution") {
         scenario("Directory for action does not exist") {
@@ -54,5 +19,125 @@ class DslFeatureSpecification : FeatureSpec({
             verify(workspace.logger).error("Invalid directory /default/project")
         }
     }
+
+    feature("Olm Stubs Run") {
+        beforeTest {
+            ActionRegistry.register(GitClone::class) { name -> GitClone(name) }
+            ActionRegistry.register(Maven::class) { name -> Maven(name) }
+        }
+
+        afterTest {
+            ActionRegistry.unregister(GitClone::class)
+            ActionRegistry.unregister(Maven::class)
+            killPatterns("exec:java")
+        }
+
+        scenario("Clone it") {
+            val actualWorkspace = workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                }
+            }
+            actualWorkspace shouldBe Workspace("w", projects = listOf(Project("p", listOf(GitClone("g")))))
+            actualWorkspace.execute()
+        }
+
+        // TODO:  Set up fixture so that the project already exists as a unit test
+        scenario("Run it with everything specified") {
+            workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                    action<Maven>("m") {
+                        pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                }
+            }.execute()
+        }
+
+        scenario("Run it with pom missing which should inherit from previous action") {
+            workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                    action<Maven>("m") {
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                }
+            }.execute()
+        }
+
+        scenario("Fail when pom missing completely") {
+            val workspace = workspace("w") {
+                project("p") {
+                    action<Maven>("m") {
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                }
+            }.apply {
+                logger = mock(Logger::class.java)
+            }
+            workspace.execute()
+            verify(workspace.logger).error("Missing pomXmlFilePath")
+        }
+
+        scenario("Fail when settings missing completely with pom there") {
+            val workspace = workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                    action<Maven>("m") {
+                        pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                }
+            }.apply {
+                logger = mock(Logger::class.java)
+            }
+            workspace.execute()
+            verify(workspace.logger).error("Missing settingsXmlFilePath")
+        }
+
+        scenario("Fail when settings missing completely with pom derived from previous action") {
+            val workspace = workspace("w") {
+                project("p") {
+                    action<GitClone>("g") {
+                        targetDirectoryPath = "/tmp/workspace/olm-stubs"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
+                    }
+                    action<Maven>("m") {
+                        goals += "install"
+                        goals += "exec:java"
+                    }
+                }
+            }.apply {
+                logger = mock(Logger::class.java)
+            }
+            workspace.execute()
+            verify(workspace.logger).error("Missing settingsXmlFilePath")
+        }
+
+        afterTest {
+            ActionRegistry.unregister(GitClone::class)
+        }
+    }
+
 })
 
