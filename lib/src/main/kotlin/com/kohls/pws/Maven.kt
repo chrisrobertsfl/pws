@@ -11,21 +11,21 @@ data class Maven(override val name: String = generateName(), val goals: MutableL
 
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
-
-        if (pomXmlFilePath == null) {
-            pomXmlFilePath = requireNotNull(parameters["targetDirectory"]) { "Missing pomXmlFilePath" }.let {
-                val targetDirectory = it as Directory
-                val pomFile = targetDirectory.asFile("pom.xml")
-                pomFile.path
-            }
-        }
-        val settingsXml = requireNotNull(settingsXmlFilePath) { "Missing settingsXmlFilePath" }
-        val args: List<Any> = listOf(pomXmlFilePath!!, settingsXml) + goals
-
+        val pomXml = resolvePomXmlFilePath(parameters)
+        val settingsXml = resolveSettingsXmlFilePath()
+        val args: List<Any> = listOf(pomXml, settingsXml) + goals
         val executableScript = BASH_SCRIPT.createExecutableScript(background = true)
         executableScript.execute(args)
         return Parameters.create("logFile" to executableScript.logFile)
     }
+
+    private fun resolvePomXmlFilePath(parameters: Parameters): String = pomXmlFilePath ?: requireNotNull(parameters["targetDirectory"]) { "Missing pomXmlFilePath" }.let {
+        val targetDirectory = it as Directory
+        val pomFile = targetDirectory.asFile("pom.xml")
+        pomFile.path
+    }
+
+    private fun resolveSettingsXmlFilePath(): String = requireNotNull(settingsXmlFilePath) { "Missing settingsXmlFilePath" }
 
     companion object {
         val BASH_SCRIPT = BashScript(commandName = "maven", body = Body.fromResource("/bash-scripts/bash-maven.sh"))

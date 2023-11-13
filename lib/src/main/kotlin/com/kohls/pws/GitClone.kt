@@ -9,13 +9,13 @@ data class GitClone(override val name: String = Action.generateName(), var overw
     private val logger by lazy { LoggerFactory.getLogger(Maven::class.java) }
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
-        val targetDirectory = handleTargetDirectory()
+        val targetDirectory = resolveAndHandleTargetDirectory()
         val script = BASH_SCRIPT.createExecutableScript()
         script.execute(listOf(repositoryUrl, targetDirectoryPath))
         return Parameters.create("targetDirectory" to targetDirectory)
     }
 
-    private fun handleTargetDirectory(): Directory {
+    private fun resolveAndHandleTargetDirectory(): Directory {
         val targetDirectory = Directory(targetDirectoryPath)
         if (targetDirectory.exists()) {
             when (overwrite) {
