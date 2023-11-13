@@ -1,7 +1,7 @@
 package com.kohls.pws
 
-import com.kohls.base.Directory
 import org.slf4j.LoggerFactory
+import java.nio.file.Paths
 
 data class Maven(override val name: String = generateName(), val goals: MutableList<String> = mutableListOf()) : Action {
     var pomXmlFilePath: String? = null
@@ -18,11 +18,8 @@ data class Maven(override val name: String = generateName(), val goals: MutableL
         return Parameters.create("logFile" to executableScript.logFile)
     }
 
-    private fun resolvePomXmlFilePath(parameters: Parameters): String = pomXmlFilePath ?: requireNotNull(parameters["targetDirectory"]) { "Missing pomXmlFilePath" }.let {
-        val targetDirectory = it as Directory
-        val pomFile = targetDirectory.asFile("pom.xml")
-        pomFile.path
-    }
+    private fun resolvePomXmlFilePath(parameters: Parameters): String =
+        pomXmlFilePath ?: requireNotNull(parameters.get<String>("targetDirectoryPath")) { "Missing pomXmlFilePath" }.let { Paths.get(it, "pom.xml").toString() }
 
     private fun resolveSettingsXmlFilePath(): String = requireNotNull(settingsXmlFilePath) { "Missing settingsXmlFilePath" }
 

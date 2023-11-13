@@ -11,13 +11,13 @@ data class GitClone(override val name: String = generateName(), var overwrite: B
     private val logger by lazy { LoggerFactory.getLogger(Maven::class.java) }
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
-        val targetDirectory = resolveAndHandleTargetDirectory()
+        handleTargetDirectory()
         val script = BASH_SCRIPT.createExecutableScript()
         script.execute(listOf(repositoryUrl, targetDirectoryPath))
-        return Parameters.create("targetDirectory" to targetDirectory)
+        return Parameters.create("targetDirectoryPath" to targetDirectoryPath)
     }
 
-    private fun resolveAndHandleTargetDirectory(): Directory {
+    private fun handleTargetDirectory() {
         val targetDirectory = Directory(targetDirectoryPath)
         if (targetDirectory.exists()) {
             when (overwrite) {
@@ -25,7 +25,6 @@ data class GitClone(override val name: String = generateName(), var overwrite: B
                 false -> throw IllegalStateException("targetDirectory '${targetDirectoryPath}' already exists and cannot be overwritten when overwrite is enabled")
             }
         }
-        return targetDirectory
     }
 
     companion object {

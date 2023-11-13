@@ -12,7 +12,7 @@ data class GitCheckout(override val name: String = generateName(), var branchNam
         val targetDirectory = resolveTargetDirectoryPath(parameters)
         val script = BASH_SCRIPT.createExecutableScript()
         script.execute(listOf(targetDirectory, branchName))
-        return Parameters.create("targetDirectory" to targetDirectory)
+        return Parameters.create("targetDirectoryPath" to targetDirectory)
     }
 
     private fun resolveTargetDirectoryPath(parameters: Parameters): String {
