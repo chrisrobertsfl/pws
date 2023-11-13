@@ -27,9 +27,11 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.register(GitClone::class) { name -> GitClone(name) }
             ActionRegistry.register(Maven::class) { name -> Maven(name) }
             ActionRegistry.register(LogFileEventuallyContains::class) { name -> LogFileEventuallyContains(name) }
+            ActionRegistry.register(GitCheckout::class) { name -> GitCheckout(name) }
         }
 
         afterTest {
+            ActionRegistry.unregister(GitCheckout::class)
             ActionRegistry.unregister(LogFileEventuallyContains::class)
             ActionRegistry.unregister(Maven::class)
             ActionRegistry.unregister(GitClone::class)
@@ -52,8 +54,8 @@ class DslFeatureSpecification : FeatureSpec({
         // TODO:  Set up fixture so that the project already exists as a unit test
         scenario("Run it with everything specified") {
             workspace("w") {
-                project("p") {
-                    action<GitClone>("g") {
+                project("olm-stubs") {
+                    action<GitClone>("olm-stubs git clone") {
                         targetDirectoryPath = "/tmp/workspace/olm-stubs"
                         repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
                     }
@@ -64,8 +66,18 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                     action<LogFileEventuallyContains>("l") {
-                        duration = 5.seconds
+                        duration = 10.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
+                    }
+                }
+                project("store-fulfillment") {
+                    action<GitClone>("store-fulfillment git clone") {
+                        targetDirectoryPath = "/tmp/workspace/store-fulfillment"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/store-fulfillment.git"
+                    }
+                    action<GitCheckout>("store-fulfillment git checkout:  OMO-1914") {
+                        targetDirectoryPath = "/tmp/workspace/store-fulfillment"
+                        branchName = "OMO-1914"
                     }
                 }
             }.execute()
