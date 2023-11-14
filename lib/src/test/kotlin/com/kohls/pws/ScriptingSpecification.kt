@@ -84,7 +84,7 @@ class BashScriptSpecification : FeatureSpec({
             executableScript.execute(listOf("/Users/TKMA5QX/projects/olm-meta-repo/olm-stubs/pom.xml", "/Users/TKMA5QX/data/repo/maven/settings.xml", "clean", "install", "exec:java"))
             Eventually(condition = {
                 executableScript.logFile.validate { it.readText().contains("8080") }
-            }).satisfiedWithin(duration = 10.seconds) shouldBe true
+            }).satisfiedWithinDuration(duration = 10.seconds) shouldBe true
         }
     }
 

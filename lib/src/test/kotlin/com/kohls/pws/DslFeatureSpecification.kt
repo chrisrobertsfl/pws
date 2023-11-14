@@ -5,8 +5,8 @@ import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import org.mockito.ArgumentMatchers.contains
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
+import org.mockito.Mockito
+import org.mockito.Mockito.*
 import org.slf4j.Logger
 import kotlin.time.Duration.Companion.seconds
 
@@ -28,14 +28,16 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.register(Maven::class) { name -> Maven(name) }
             ActionRegistry.register(LogFileEventuallyContains::class) { name -> LogFileEventuallyContains(name) }
             ActionRegistry.register(GitCheckout::class) { name -> GitCheckout(name) }
+            ActionRegistry.register(TextResponseHealthCheck::class) { name -> TextResponseHealthCheck(name) }
         }
 
         afterTest {
+            ActionRegistry.unregister(TextResponseHealthCheck::class)
             ActionRegistry.unregister(GitCheckout::class)
             ActionRegistry.unregister(LogFileEventuallyContains::class)
             ActionRegistry.unregister(Maven::class)
             ActionRegistry.unregister(GitClone::class)
-            killPatterns("exec:java")
+            //killPatterns("exec:java")
         }
 
         scenario("Clone it") {
@@ -53,21 +55,29 @@ class DslFeatureSpecification : FeatureSpec({
 
         // TODO:  Set up fixture so that the project already exists as a unit test
         scenario("Run it with everything specified") {
-            workspace("w") {
+
+            val mockLogger = mock(Logger::class.java)
+            val workspace = workspace("w") {
                 project("olm-stubs") {
                     action<GitClone>("olm-stubs git clone") {
                         targetDirectoryPath = "/tmp/workspace/olm-stubs"
                         repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
                     }
-                    action<Maven>("m") {
+                    action<Maven>("olm-stubs run maven") {
                         pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
                         settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
                         goals += "install"
                         goals += "exec:java"
                     }
-                    action<LogFileEventuallyContains>("l") {
+                    action<LogFileEventuallyContains>("olm-stubs check maven") {
                         duration = 10.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
+                    }
+                    action<TextResponseHealthCheck>("olm-stubs service healthcheck at port 8080") {
+                        url = "http://localhost:8080"
+                        searchedText = "StubServer is running."
+                        attempts = 5
+                        interval = 1.seconds
                     }
                 }
                 project("store-fulfillment") {
@@ -80,7 +90,13 @@ class DslFeatureSpecification : FeatureSpec({
                         branchName = "OMO-1914"
                     }
                 }
-            }.execute()
+            }
+            println("workspace = ${workspace}")
+            //workspace.apply { logger = mockLogger }.execute()
+            workspace.execute()
+            //verify(mockLogger, never()).error(contains("ERROR"))
+
+            // TODO: Check that it does not contain any errors in the log
         }
 
         scenario("Run it with pom missing which should inherit from previous action") {
