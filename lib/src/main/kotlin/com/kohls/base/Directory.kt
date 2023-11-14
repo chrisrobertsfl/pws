@@ -14,9 +14,8 @@ data class Directory(val path: String) {
         return Directory("$path/$childPathNoSlashes")
     }
 
-
-
     fun asFile(fileName: String): File {
         return directoryPath.resolve(fileName)
     }
+    fun toFile() = directoryPath
 }

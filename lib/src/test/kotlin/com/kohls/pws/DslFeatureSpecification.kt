@@ -37,7 +37,7 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.unregister(LogFileEventuallyContains::class)
             ActionRegistry.unregister(Maven::class)
             ActionRegistry.unregister(GitClone::class)
-            //killPatterns("exec:java")
+            killPatterns("exec:java")
         }
 
         scenario("Clone it") {
@@ -66,6 +66,7 @@ class DslFeatureSpecification : FeatureSpec({
                     action<Maven>("olm-stubs run maven") {
                         pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
                         settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        workingDirectoryPath = "/tmp/workspace/olm-stubs"
                         goals += "install"
                         goals += "exec:java"
                     }
@@ -92,10 +93,7 @@ class DslFeatureSpecification : FeatureSpec({
                 }
             }
             println("workspace = ${workspace}")
-            //workspace.apply { logger = mockLogger }.execute()
             workspace.execute()
-            //verify(mockLogger, never()).error(contains("ERROR"))
-
             // TODO: Check that it does not contain any errors in the log
         }
 

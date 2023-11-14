@@ -16,7 +16,7 @@ data class LogFileEventuallyContains(override val name: String = generateName(),
         val condition = { logFile.validate { it.readText().contains(searchedText, ignoreCase = ignoreCase) } }
         val eventually = Eventually(condition = condition)
         val message = "Could not find '${searchedText}' in ${logFile.fullPath()} within $duration"
-        eventually.satisfiedWithinDurationOrThrow(duration = duration, message = message)
+        eventually.withinDurationOrThrow(duration = duration, message = message)
         return Parameters.EMPTY
     }
 }

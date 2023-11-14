@@ -1,47 +1,56 @@
 package com.kohls.base
 
-import com.kohls.pws.GitCheckout
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
 
 data class Eventually(val condition: () -> Boolean) {
     private val logger by lazy { LoggerFactory.getLogger(Eventually::class.java) }
 
-    fun satisfiedWithinDuration(duration: Duration, interval: Duration = 500.milliseconds): Boolean {
-        val end = System.currentTimeMillis() + duration.inWholeMilliseconds
+    private fun waitForCondition(
+        attempts: Int? = null, duration: Duration? = null, interval: Duration = INTERVAL, initialDelay: Duration = INITIAL_DELAY
+    ): Boolean {
+        sleep(initialDelay.inWholeMilliseconds)
+        val endTime = duration?.let { System.currentTimeMillis() + it.inWholeMilliseconds }
 
-        while (System.currentTimeMillis() < end) {
+        var attemptCount = 0
+        while (attempts == null || attemptCount < attempts) {
+            if (endTime != null && System.currentTimeMillis() >= endTime) break
+
+            logger.trace("Checking condition at attempt ${attemptCount + 1} of $attempts (interval is $interval)")
             if (condition()) {
                 return true
             }
             sleep(interval.inWholeMilliseconds)
+            attemptCount++
         }
         return false
     }
 
-    fun satisifiedWithinAttempts(attempts: Int, interval: Duration = 500.milliseconds): Boolean {
-        logger.trace("Start checking condition for $attempts attempts")
-        repeat(attempts) {
-            logger.trace("Checking condition at attempt ${it + 1} of $attempts (interval is $interval)")
-            if (condition()) {
-                return true
-            }
-            sleep(interval.inWholeMilliseconds)
-        }
-        return false
-    }
+    fun withinDuration(duration: Duration, interval: Duration = INTERVAL, initialDelay: Duration = INITIAL_DELAY): Boolean =
+        waitForCondition(duration = duration, interval = interval, initialDelay = initialDelay)
 
-    fun satisfiedWithinDurationOrThrow(duration: Duration, interval: Duration = 500.milliseconds, message: String) {
-        if (!satisfiedWithinDuration(duration, interval)) {
+    fun withinAttempts(attempts: Int, interval: Duration = INTERVAL, initialDelay: Duration = INITIAL_DELAY): Boolean =
+        waitForCondition(attempts = attempts, interval = interval, initialDelay = initialDelay)
+
+    fun withinDurationOrThrow(duration: Duration, interval: Duration = INTERVAL, initialDelay: Duration = INITIAL_DELAY, message: String) {
+        if (!withinDuration(duration, interval, initialDelay)) {
             throw IllegalStateException(message)
         }
     }
 
-    fun satisfiedWithinAttemptsOrThrow(attempts: Int, interval: Duration = 500.milliseconds, message: String) {
-        if (!satisifiedWithinAttempts(attempts, interval)) {
+    fun withinAttemptsOrThrow(attempts: Int, interval: Duration = INTERVAL, initialDelay: Duration = INITIAL_DELAY, message: String) {
+        if (!withinAttempts(attempts, interval, initialDelay)) {
             throw IllegalStateException(message)
         }
+    }
+
+    companion object {
+        val INITIAL_DELAY = 0.seconds
+
+        val INTERVAL = 500.milliseconds
     }
 }

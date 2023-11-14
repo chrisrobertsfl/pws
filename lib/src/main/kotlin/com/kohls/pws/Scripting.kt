@@ -1,5 +1,6 @@
 package com.kohls.pws
 
+import com.kohls.base.Directory
 import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,15 +51,19 @@ data class LogFile(private val file: File) {
 
 }
 
-data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, val background: Boolean = false) {
+data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, val background: Boolean = false, val workingDirectory: Directory? = null) {
     private val logger: Logger = LoggerFactory.getLogger(ExecutableScript::class.java)
     fun scriptContents(): String = scriptFile.contents()
 
     fun execute(args: List<Any>) = runCatching {
         logger.info("Script is here :  ${scriptFile.fullPath()}")
         logger.info("Log is here    :  ${logFile.fullPath()}")
+        workingDirectory?.let {
+            logger.info("Working dir    :  $workingDirectory")
+        }
+
         val commandLine = scriptFile.commandLine(args)
-        logger.info("Command line   :  $commandLine")
+        logger.info("Command line   :  ${commandLine.joinToString(separator = " ")}")
         val exitCode = executeProcess(commandLine)
         if (exitCode != 0) throw Exception("Bash script execution reports failure with exit code $exitCode")
     }.onFailure {
@@ -69,7 +74,11 @@ data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, va
 
 
     private fun executeProcess(commandLine: List<String>): Int {
-        val process = ProcessBuilder(commandLine).inheritIO().redirectOutput(ProcessBuilder.Redirect.appendTo(logFile.forAppending())).redirectErrorStream(true).start()
+        var processBuilder = ProcessBuilder(commandLine).inheritIO().redirectOutput(ProcessBuilder.Redirect.appendTo(logFile.forAppending())).redirectErrorStream(true)
+        workingDirectory?.let {
+            processBuilder = processBuilder.directory(workingDirectory.toFile())
+        }
+        val process = processBuilder.start()
         logFile.consumeLines()
         if (background) return 0
         val exitCode = process.waitFor()
@@ -125,7 +134,9 @@ data class BashScript(
     }
 
     private fun StringBuilder.appendWithNewLine(string: String) = this.append("$string${System.lineSeparator()}")
-    fun createExecutableScript(background: Boolean = false): ExecutableScript = ExecutableScript(scriptFile = generateScriptFile(), logFile = generateLogFile(), background = background)
+    fun createExecutableScript(background: Boolean = false, workingDirectory: Directory? = null): ExecutableScript =
+        ExecutableScript(scriptFile = generateScriptFile(), logFile = generateLogFile(), background = background, workingDirectory = workingDirectory)
+
     private fun generateScriptFile(): ScriptFile = ScriptFile(file = (scriptFileGenerator ?: ScriptFileGenerator(prefix = commandName)).generate().apply { writeText(render()) })
     private fun generateLogFile(): LogFile = LogFile((logFileGenerator ?: LogFileGenerator(prefix = commandName)).generate())
 
