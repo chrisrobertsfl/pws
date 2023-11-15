@@ -18,6 +18,7 @@ data class TextResponseHealthCheck(
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
         ServiceHealthCheck(
+            name = name,
             url = url,
             responsePredicate = ResponsePredicate.TextBasedPredicate(searchedText = searchedText, ignoreCase = ignoreCase),
             attempts = attempts,

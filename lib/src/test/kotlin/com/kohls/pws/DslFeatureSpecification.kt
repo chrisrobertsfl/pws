@@ -5,7 +5,6 @@ import com.kohls.base.nonExistingDirectory
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import org.mockito.ArgumentMatchers.contains
-import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.slf4j.Logger
 import kotlin.time.Duration.Companion.seconds
@@ -70,7 +69,7 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "install"
                         goals += "exec:java"
                     }
-                    action<LogFileEventuallyContains>("olm-stubs check maven") {
+                    action<LogFileEventuallyContains>("olm-stubs running via maven") {
                         initialDelay = 1.seconds
                         duration = 10.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
@@ -89,12 +88,12 @@ class DslFeatureSpecification : FeatureSpec({
                     }
                     action<GitCheckout>("store-fulfillment git checkout:  OMO-1914") {
                         targetDirectoryPath = "/tmp/workspace/store-fulfillment"
-                        branchName = "OMO-1914"
+                        branchName = "test-branch"
                     }
                 }
             }
-            workspace.execute()
-            // TODO: Check that it does not contain any errors in the log
+            workspace.apply { logger = mockLogger }.execute()
+            verify(mockLogger, never()).error(any())
         }
 
         scenario("Run it with pom missing which should inherit from previous action") {

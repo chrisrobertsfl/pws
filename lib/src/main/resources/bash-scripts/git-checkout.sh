@@ -1,6 +1,6 @@
 
 
-(( ${#} == 2 ))|| { echo "Usage: ${0} <target-directory> <branch-name>"; exit 1; }
-echo "target directory : $1"
-echo "branch name      : $2"
-git -C ${1} checkout ${2} 2>&1
+(( ${#} == 1 ))|| { echo "Usage: ${0} <branch-name>"; exit 1; }
+echo "branch name      : $1"
+echo "git checkout ${1}"
+git checkout ${1} 2>&1

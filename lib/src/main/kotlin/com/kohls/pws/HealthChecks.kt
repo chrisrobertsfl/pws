@@ -27,11 +27,11 @@ sealed interface ResponsePredicate {
     }
 }
 
-data class ServiceHealthCheck(val url: String, val responsePredicate: ResponsePredicate, val attempts: Int, val interval: Duration, val initialDelay: Duration = INITIAL_DELAY) {
+data class ServiceHealthCheck(val name : String, val url: String, val responsePredicate: ResponsePredicate, val attempts: Int, val interval: Duration, val initialDelay: Duration = INITIAL_DELAY) {
     private val logger by lazy { LoggerFactory.getLogger(ServiceHealthCheck::class.java) }
 
     fun checkHealth() {
-        val eventually = Eventually { responsePredicate.test(get(url)) }
+        val eventually = Eventually(name) { responsePredicate.test(get(url)) }
         val exception = Exception("Service did not respond with $attempts attempt(s) while checking response: $responsePredicate")
 
         try {

@@ -145,11 +145,8 @@ data class BashScript(
         ExecutableScript(scriptFile = generateScriptFile(), logFile = generateLogFile(), background = background, workingDirectory = workingDirectory)
 
     private fun generateScriptFile(): ScriptFile {
-        logger.debug("scriptFileGenerator = ${scriptFileGenerator}")
         val fileGenerator = scriptFileGenerator ?: ScriptFileGenerator(prefix = commandName)
-        logger.debug("fileGenerator       = ${fileGenerator}")
         val file = fileGenerator.generate().apply { writeText(render()) }
-        logger.debug("file                = ${file}")
         return ScriptFile(file = file)
     }
     private fun generateLogFile(): LogFile = LogFile((logFileGenerator ?: LogFileGenerator(prefix = commandName)).generate())

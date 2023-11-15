@@ -17,7 +17,7 @@ data class LogFileEventuallyContains(override val name: String = generateName(),
             logger.trace("Initial delay of $initialDelay before checking condition")
         }
         logger.trace("looking for '{}' in {}", searchedText, logFile)
-        Eventually(logFile.hasText()).isMetWithin(criteria = timeFrame, exception = exception(logFile))
+        Eventually(name = name, condition = logFile.hasText()).isMetWithin(criteria = timeFrame, exception = exception(logFile))
         return Parameters.EMPTY
     }
 

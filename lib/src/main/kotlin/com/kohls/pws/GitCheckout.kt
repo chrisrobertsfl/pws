@@ -9,20 +9,19 @@ data class GitCheckout(override val name: String = generateName(), var branchNam
     private val logger by lazy { LoggerFactory.getLogger(GitCheckout::class.java) }
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
-        val targetDirectory = resolveTargetDirectoryPath(parameters)
-        val script = BASH_SCRIPT.createExecutableScript()
-        script.execute(listOf(targetDirectory, branchName))
-        return Parameters.create("targetDirectoryPath" to targetDirectory)
+        val workingDirectory = resolveTargetDirectoryPath(parameters)
+        val script = BASH_SCRIPT.createExecutableScript(workingDirectory = workingDirectory)
+        script.execute(listOf(branchName))
+        return Parameters.create("targetDirectoryPath" to workingDirectory.path)
     }
 
-    private fun resolveTargetDirectoryPath(parameters: Parameters): String {
+    private fun resolveTargetDirectoryPath(parameters: Parameters): Directory {
         targetDirectoryPath?.let {
             val directory = Directory(it)
             require(directory.exists()) { "Invalid targetDirectoryPath: $it does not exist." }
-            return it
+            return directory
         }
-        val targetDirectory = requireNotNull(parameters.get<Directory>("targetDirectory")) { "Missing targetDirectoryPath" }
-        return targetDirectory.path
+        return requireNotNull(parameters.get<Directory>("targetDirectory")) { "Missing targetDirectoryPath" }
     }
 
     companion object {
