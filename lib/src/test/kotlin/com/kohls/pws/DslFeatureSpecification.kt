@@ -71,6 +71,7 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                     action<LogFileEventuallyContains>("olm-stubs check maven") {
+                        initialDelay = 1.seconds
                         duration = 10.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
                     }
@@ -92,7 +93,6 @@ class DslFeatureSpecification : FeatureSpec({
                     }
                 }
             }
-            println("workspace = ${workspace}")
             workspace.execute()
             // TODO: Check that it does not contain any errors in the log
         }

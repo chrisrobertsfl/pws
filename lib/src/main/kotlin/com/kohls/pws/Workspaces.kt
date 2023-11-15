@@ -11,9 +11,10 @@ fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {
 data class Workspace(val name: String = randomUUID().toString(), val projects: List<Project> = emptyList(), var logger: Logger = LoggerFactory.getLogger(Workspace::class.java)) {
     fun execute() = try {
         for (project in projects) {
+            logger.info("Executing Project : ${project.name}")
             var parameters: Parameters = Parameters.create()
             for (action in project.actions) {
-                logger.info("Running action[${action}] given:  ${parameters}")
+                logger.info("Performing Action: ${action.name}")
                 parameters = action.perform(parameters)
             }
         }

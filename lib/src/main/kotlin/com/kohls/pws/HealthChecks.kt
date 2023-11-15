@@ -1,7 +1,8 @@
 package com.kohls.pws
 
+import com.kohls.base.CriteriaMet.Companion.INITIAL_DELAY
 import com.kohls.base.Eventually
-import com.kohls.base.Eventually.Companion.INITIAL_DELAY
+import com.kohls.base.NumberOfAttempts
 import khttp.get
 import khttp.responses.Response
 import kotlinx.serialization.json.Json
@@ -27,18 +28,15 @@ sealed interface ResponsePredicate {
 }
 
 data class ServiceHealthCheck(val url: String, val responsePredicate: ResponsePredicate, val attempts: Int, val interval: Duration, val initialDelay: Duration = INITIAL_DELAY) {
-    private val logger by lazy { LoggerFactory.getLogger(Maven::class.java) }
+    private val logger by lazy { LoggerFactory.getLogger(ServiceHealthCheck::class.java) }
 
     fun checkHealth() {
-        val eventually = Eventually {
-            val response = get(url)
-            responsePredicate.test(response)
-        }
+        val eventually = Eventually { responsePredicate.test(get(url)) }
+        val exception = Exception("Service did not respond with $attempts attempt(s) while checking response: $responsePredicate")
+
         try {
-            eventually.withinAttemptsOrThrow(
-                attempts = attempts, interval = interval, initialDelay = initialDelay, message = "Service did not respond with $attempts attempt(s) while checking response: $responsePredicate"
-            )
-            logger.info("Looks like all is ok with:  $this")
+            eventually.isMetWithin(NumberOfAttempts(attempts = attempts, initialDelay = initialDelay, interval = interval), exception = exception)
+            logger.debug("Looks like all is ok with:  {}", this)
         } catch (connectionException: ConnectException) {
             throw Exception("Service health check connection refused url: $url")
         }

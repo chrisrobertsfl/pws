@@ -40,6 +40,7 @@ inline fun <reified T> T.multilinePrint(typeName: String? = T::class.simpleName)
 fun existingFile(): File {
     val file = Mockito.mock(File::class.java)
     Mockito.`when`(file.exists()).thenReturn(true)
+    Mockito.`when`(file.name).thenReturn("name")
     return file
 }
 

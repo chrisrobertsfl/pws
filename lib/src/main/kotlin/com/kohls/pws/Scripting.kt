@@ -28,6 +28,7 @@ data class ScriptFile(private val file: File) {
 }
 
 data class LogFile(private val file: File) {
+    private val logger = LoggerFactory.getLogger(file.name)
 
     private val scope = CoroutineScope(Dispatchers.Default)
     fun validate(predicate: (File) -> Boolean): Boolean = predicate(file)
@@ -40,7 +41,10 @@ data class LogFile(private val file: File) {
         while (isActive) {
             val allLines = file.readLines()
             if (allLines.size > lastLineCount) {
-                allLines.drop(lastLineCount).forEach { println(it) }
+                allLines.drop(lastLineCount).forEach {
+                    //println(it)
+                    logger.trace(it)
+                }
                 lastLineCount = allLines.size
             }
             delay(100)  // Wait before checking for new lines
@@ -56,14 +60,14 @@ data class ExecutableScript(val scriptFile: ScriptFile, val logFile: LogFile, va
     fun scriptContents(): String = scriptFile.contents()
 
     fun execute(args: List<Any>) = runCatching {
-        logger.info("Script is here :  ${scriptFile.fullPath()}")
-        logger.info("Log is here    :  ${logFile.fullPath()}")
+        logger.debug("Script is here :  ${scriptFile.fullPath()}")
+        logger.debug("Log is here    :  ${logFile.fullPath()}")
         workingDirectory?.let {
-            logger.info("Working dir    :  $workingDirectory")
+            logger.debug("Working dir    :  $workingDirectory")
         }
 
         val commandLine = scriptFile.commandLine(args)
-        logger.info("Command line   :  ${commandLine.joinToString(separator = " ")}")
+        logger.debug("Command line   :  ${commandLine.joinToString(separator = " ")}")
         val exitCode = executeProcess(commandLine)
         if (exitCode != 0) throw Exception("Bash script execution reports failure with exit code $exitCode")
     }.onFailure {
@@ -127,6 +131,9 @@ data class BashScript(
     private val scriptFileGenerator: FileGenerator? = null,
     private val logFileGenerator: FileGenerator? = null,
 ) : ScriptRendering {
+
+    private val logger by lazy { LoggerFactory.getLogger(BashScript::class.java) }
+
     override fun render() = buildString {
         appendWithNewLine(shebang.render())
         environmentVariables.forEach { appendWithNewLine(it.render()) }
@@ -137,7 +144,14 @@ data class BashScript(
     fun createExecutableScript(background: Boolean = false, workingDirectory: Directory? = null): ExecutableScript =
         ExecutableScript(scriptFile = generateScriptFile(), logFile = generateLogFile(), background = background, workingDirectory = workingDirectory)
 
-    private fun generateScriptFile(): ScriptFile = ScriptFile(file = (scriptFileGenerator ?: ScriptFileGenerator(prefix = commandName)).generate().apply { writeText(render()) })
+    private fun generateScriptFile(): ScriptFile {
+        logger.debug("scriptFileGenerator = ${scriptFileGenerator}")
+        val fileGenerator = scriptFileGenerator ?: ScriptFileGenerator(prefix = commandName)
+        logger.debug("fileGenerator       = ${fileGenerator}")
+        val file = fileGenerator.generate().apply { writeText(render()) }
+        logger.debug("file                = ${file}")
+        return ScriptFile(file = file)
+    }
     private fun generateLogFile(): LogFile = LogFile((logFileGenerator ?: LogFileGenerator(prefix = commandName)).generate())
 
 }
