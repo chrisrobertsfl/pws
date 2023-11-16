@@ -109,7 +109,7 @@ class DslFeatureSpecification : FeatureSpec({
                         duration = 10.seconds
                         searchedText = "Started ConfigServerApplication in"
                     }
-                    action<JsonResponseHealthCheck>("config-server service healthcheck at port 8080") {
+                    action<JsonResponseHealthCheck>("config-server service healthcheck at port 5001") {
                         url = "http://localhost:5001/actuator/health"
                         searchedField = "status" to "UP"
                         attempts = 10
@@ -121,6 +121,23 @@ class DslFeatureSpecification : FeatureSpec({
                         targetDirectoryPath = "/tmp/workspace/store-fulfillment"
                         repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/store-fulfillment.git"
                         branchName = "test-branch"
+                    }
+                    action<Maven>("store-fulfillment starts via maven") {
+                        pomXmlFilePath = "/tmp/workspace/store-fulfillment/pom.xml"
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        workingDirectoryPath = "/tmp/workspace/store-fulfillment"
+                        goals += "spring-boot:run"
+                    }
+                    action<LogFileEventuallyContains>("store-fulfillment is running via maven") {
+                        initialDelay = 3.seconds
+                        duration = 30.seconds
+                        searchedText = "Started StoreFulfillmentApplication in"
+                    }
+                    action<JsonResponseHealthCheck>("store-fulfillment service healthcheck at port 8090") {
+                        url = "http://localhost:8090/actuator/health"
+                        searchedField = "status" to "UP"
+                        attempts = 10
+                        interval = 1.seconds
                     }
                 }
             }
