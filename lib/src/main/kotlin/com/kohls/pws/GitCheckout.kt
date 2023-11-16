@@ -10,18 +10,13 @@ data class GitCheckout(override val name: String = generateName(), var branchNam
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
         val workingDirectory = resolveTargetDirectoryPath(parameters)
-        val script = BASH_SCRIPT.createExecutableScript(workingDirectory = workingDirectory)
-        script.execute(listOf(branchName))
+        BASH_SCRIPT.createExecutableScript(workingDirectory = workingDirectory).execute(listOf(branchName))
         return Parameters.create("targetDirectoryPath" to workingDirectory.path)
     }
 
     private fun resolveTargetDirectoryPath(parameters: Parameters): Directory {
-        targetDirectoryPath?.let {
-            val directory = Directory(it)
-            require(directory.exists()) { "Invalid targetDirectoryPath: $it does not exist." }
-            return directory
-        }
-        return requireNotNull(parameters.get<Directory>("targetDirectory")) { "Missing targetDirectoryPath" }
+        val path = targetDirectoryPath ?: parameters.getOrThrow("targetDirectoryPath")
+        return Directory(path).existsOrThrow("Invalid targetDirectoryPath: $targetDirectoryPath does not exist.")
     }
 
     companion object {

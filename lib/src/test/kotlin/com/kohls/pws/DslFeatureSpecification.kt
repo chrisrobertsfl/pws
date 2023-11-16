@@ -28,9 +28,13 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.register(LogFileEventuallyContains::class) { name -> LogFileEventuallyContains(name) }
             ActionRegistry.register(GitCheckout::class) { name -> GitCheckout(name) }
             ActionRegistry.register(TextResponseHealthCheck::class) { name -> TextResponseHealthCheck(name) }
+            ActionRegistry.register(JsonResponseHealthCheck::class) { name -> JsonResponseHealthCheck(name) }
+            ActionRegistry.register(GitPrepare::class) { name -> GitPrepare(name) }
         }
 
         afterTest {
+            ActionRegistry.unregister(GitPrepare::class)
+            ActionRegistry.unregister(JsonResponseHealthCheck::class)
             ActionRegistry.unregister(TextResponseHealthCheck::class)
             ActionRegistry.unregister(GitCheckout::class)
             ActionRegistry.unregister(LogFileEventuallyContains::class)
@@ -62,14 +66,14 @@ class DslFeatureSpecification : FeatureSpec({
                         targetDirectoryPath = "/tmp/workspace/olm-stubs"
                         repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/olm-stubs.git"
                     }
-                    action<Maven>("olm-stubs run maven") {
+                    action<Maven>("olm-stubs starts via maven") {
                         pomXmlFilePath = "/tmp/workspace/olm-stubs/pom.xml"
                         settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
                         workingDirectoryPath = "/tmp/workspace/olm-stubs"
                         goals += "install"
                         goals += "exec:java"
                     }
-                    action<LogFileEventuallyContains>("olm-stubs running via maven") {
+                    action<LogFileEventuallyContains>("olm-stubs is running via maven") {
                         initialDelay = 1.seconds
                         duration = 10.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
@@ -81,18 +85,39 @@ class DslFeatureSpecification : FeatureSpec({
                         interval = 1.seconds
                     }
                 }
+                project("config-server") {
+                    action<GitClone>("config-server git clone") {
+                        targetDirectoryPath = "/tmp/workspace/config-server"
+                        repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/config-server.git"
+                    }
+                    action<Maven>("config-server starts via maven") {
+                        pomXmlFilePath = "/tmp/workspace/config-server/pom.xml"
+                        settingsXmlFilePath = "/Users/TKMA5QX/data/repo/maven/settings.xml"
+                        workingDirectoryPath = "/tmp/workspace/config-server"
+                        goals += "spring-boot:run"
+                    }
+                    action<LogFileEventuallyContains>("config-server is running via maven") {
+                        initialDelay = 3.seconds
+                        duration = 10.seconds
+                        searchedText = "Started ConfigServerApplication in"
+                    }
+                    action<JsonResponseHealthCheck>("config-server service healthcheck at port 8080") {
+                        url = "http://localhost:5001/actuator/health"
+                        searchedField = "status" to "UP"
+                        attempts = 10
+                        interval = 1.seconds
+                    }
+                }
                 project("store-fulfillment") {
-                    action<GitClone>("store-fulfillment git clone") {
+                    action<GitPrepare>("store-fulfillment git prepare") {
                         targetDirectoryPath = "/tmp/workspace/store-fulfillment"
                         repositoryUrl = "git@gitlab.com:kohls/scps/scf/olm/store-fulfillment.git"
-                    }
-                    action<GitCheckout>("store-fulfillment git checkout:  OMO-1914") {
-                        targetDirectoryPath = "/tmp/workspace/store-fulfillment"
                         branchName = "test-branch"
                     }
                 }
             }
             workspace.apply { logger = mockLogger }.execute()
+            //workspace.execute()
             verify(mockLogger, never()).error(any())
         }
 

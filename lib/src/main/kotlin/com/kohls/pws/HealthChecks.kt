@@ -19,10 +19,12 @@ sealed interface ResponsePredicate {
         override fun test(response: Response): Boolean = response.text.contains(searchedText, ignoreCase)
     }
 
-    data class JsonBasedPredicate(private val key: String, private val expectedValue: String) : ResponsePredicate {
+    data class JsonBasedPredicate(private val searchedField : Pair<String, String>, private val ignoreCase: Boolean = true) : ResponsePredicate {
         override fun test(response: Response): Boolean {
             val json = Json.parseToJsonElement(response.text).jsonObject
-            return json[key]?.jsonPrimitive?.content == expectedValue
+            val actual = json[searchedField.first]?.jsonPrimitive?.content
+            val expected = searchedField.second
+            return expected.equals(actual, ignoreCase)
         }
     }
 }
