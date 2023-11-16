@@ -6,7 +6,9 @@ import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import org.mockito.ArgumentMatchers.contains
 import org.mockito.Mockito.*
+import org.mockito.kotlin.whenever
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.seconds
 
 class DslFeatureSpecification : FeatureSpec({
@@ -40,7 +42,7 @@ class DslFeatureSpecification : FeatureSpec({
             ActionRegistry.unregister(LogFileEventuallyContains::class)
             ActionRegistry.unregister(Maven::class)
             ActionRegistry.unregister(GitClone::class)
-            killPatterns("exec:java")
+            killPatterns("exec:java", "spring-boot:run")
         }
 
         scenario("Clone it") {
@@ -60,6 +62,12 @@ class DslFeatureSpecification : FeatureSpec({
         scenario("Run it with everything specified") {
 
             val mockLogger = mock(Logger::class.java)
+            doAnswer { invocation ->
+                val message = invocation.getArgument<String>(0)
+                LoggerFactory.getLogger(Workspace::class.java).info(message)
+                null // since it's a void method
+            }.whenever(mockLogger).info(anyString())
+
             val workspace = workspace("w") {
                 project("olm-stubs") {
                     action<GitClone>("olm-stubs git clone") {

@@ -14,7 +14,7 @@ data class Workspace(val name: String = randomUUID().toString(), val projects: L
             logger.info("Executing Project : ${project.name}")
             var parameters: Parameters = Parameters.create()
             for (action in project.actions) {
-                logger.info("Performing Action: ${action.name}")
+                logger.info("Performing Action : ${action.name}")
                 parameters = action.perform(parameters)
             }
         }
