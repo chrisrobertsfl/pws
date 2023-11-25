@@ -58,11 +58,17 @@ data class TimeFrame(val duration: Duration, val initialDelay: Duration = INITIA
 
 class Eventually(val name: String? = null, private val condition: () -> Boolean) {
     fun isMetWithin(criteria: CriteriaMet, exception: Exception? = null): Boolean {
-        val result = criteria.checkCondition(Condition(name = name, isMet = condition))
+        val result = criteria.checkCondition(BasicCondition(name = name, met = condition))
         if (!result && exception != null) throw exception
         return result
     }
 }
 
-data class Condition(val name: String?, val isMet: () -> Boolean)
+ interface Condition {
+     val name : String?
+    fun isMet() : Boolean
+}
+open class BasicCondition(override val name: String?, val met: () -> Boolean) : Condition {
+    override fun isMet(): Boolean = met()
+}
 
