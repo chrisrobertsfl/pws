@@ -39,6 +39,7 @@ dependencies {
 
     // Utilities
     testImplementation("org.apache.commons:commons-lang3:3.13.0")
+    testImplementation("org.instancio:instancio-core:3.6.0")
 
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
@@ -53,6 +54,7 @@ dependencies {
     implementation("com.ingenifi:infera:1.0.0")
     implementation("org.drools:drools-tms:8.33.0.Final")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("commons-io:commons-io:2.15.0")
 
 
 }

@@ -1,29 +1,26 @@
 package com.kohls.base
 
 import java.io.File
+import java.nio.file.Paths
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.exists
 
-data class Directory(val path: String) {
-    private val directoryPath: File = File(path)
-    fun delete() = directoryPath.deleteRecursively()
-    fun create() = directoryPath.mkdirs()
-    fun exists(): Boolean = directoryPath.exists()
+data class Directory(private val inputPath: String) {
+    val path = Paths.get(inputPath)
 
-    fun existsOrThrow(message: String = "Directory path $path does not exist"): Directory {
+    @OptIn(ExperimentalPathApi::class)
+    fun delete(): Directory = apply {
+        path.deleteRecursively()
+    }
+
+    fun exists(): Boolean = path.exists()
+
+
+    fun existsOrThrow(message: String = "Directory path $inputPath does not exist"): Directory {
         require(exists()) { message }
         return this
     }
 
-    fun canBeCreated() = !exists() && directoryPath.parentFile?.canWrite() ?: false
-
-    fun isNotThere(): Boolean = path.isBlank()
-    fun append(childPath: String): Directory {
-        val childPathNoSlashes = childPath.dropWhile { it == '/' }
-        return Directory("$path/$childPathNoSlashes")
-    }
-
-    fun asFile(fileName: String): File {
-        return directoryPath.resolve(fileName)
-    }
-
-    fun toFile() = directoryPath
+    fun toFile(): File = path.toFile()
 }

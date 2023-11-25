@@ -8,7 +8,7 @@ interface Action {
     fun perform(parameters: Parameters = EMPTY): Parameters
 }
 
-data class Parameters(private val params: MutableMap<String, Any>) {
+data class Parameters(private var params: MutableMap<String, Any> = mutableMapOf()) {
     @Suppress("UNCHECKED_CAST")
     operator fun <T> get(key: String): T? = params[key] as? T
 
@@ -16,6 +16,10 @@ data class Parameters(private val params: MutableMap<String, Any>) {
 
     operator fun <T> set(key: String, value: T) {
         params[key] = value as Any
+    }
+
+    operator fun plusAssign(pair: Pair<String, Any>) {
+        this[pair.first] = pair.second
     }
 
     companion object {

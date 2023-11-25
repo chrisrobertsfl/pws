@@ -5,17 +5,20 @@ import org.slf4j.LoggerFactory
 import java.util.UUID.randomUUID
 
 fun workspace(name: String, block: WorkspaceConfig.() -> Unit = {}): Workspace {
-    return WorkspaceConfig(name).apply(block).configure()
+    val configure = WorkspaceConfig(name).apply(block).configure()
+    return configure
 }
 
-data class Workspace(val name: String = randomUUID().toString(), val projects: List<Project> = emptyList(), var logger: Logger = LoggerFactory.getLogger(Workspace::class.java)) {
+data class Workspace(val name: String = randomUUID().toString(), val projects: List<Project> = emptyList(), var parameters: Parameters = Parameters.create(), var logger: Logger = LoggerFactory.getLogger(Workspace::class.java)) {
     fun execute() = try {
         for (project in projects) {
+            var projectParameters = parameters.copy().also {
+                it += "projectName" to project.name
+            }
             logger.info("Executing Project : ${project.name}")
-            var parameters: Parameters = Parameters.create()
             for (action in project.actions) {
                 logger.info("Performing Action : ${action.name}")
-                parameters = action.perform(parameters)
+                projectParameters = action.perform(projectParameters)
             }
         }
     } catch (exception: Exception) {
@@ -25,9 +28,17 @@ data class Workspace(val name: String = randomUUID().toString(), val projects: L
 
 data class WorkspaceConfig(val name: String) {
     private val projects = mutableListOf<Project>()
-    fun configure() = Workspace(name, projects)
+    private var parameters  = Parameters()
+    fun configure() = Workspace(name, projects, parameters = parameters)
 
     fun project(name: String, block: ProjectConfig.() -> Unit = {}) {
         projects += ProjectConfig(name).apply(block).configure()
+    }
+
+    fun targetParentPath(targetParentPath : String) {
+        parameters += "targetParentPath" to targetParentPath
+    }
+    fun settingsXmlFilePath(settingsXmlFilePath : String) {
+        parameters += "settingsXmlFilePath" to settingsXmlFilePath
     }
 }

@@ -1,11 +1,19 @@
 package com.kohls.base
 
 import com.google.common.io.Resources
+import com.kohls.base.Generators.pathNames
+import com.kohls.base.Generators.pick
 import com.kohls.pws.BashScript
 import com.kohls.pws.Body
 import com.kohls.pws.ExecutableScript
+import io.kotest.assertions.Exceptions
+import io.kotest.assertions.clueContextAsString
+import io.kotest.assertions.errorCollector
+import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.TimeoutCancellationException
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
+import org.instancio.Gen.ints
 import org.mockito.Mockito
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,11 +34,11 @@ object CustomMultilineStyle : ToStringStyle() {
     }
 }
 
-val logger : Logger = LoggerFactory.getLogger("Test Utilities")
+val logger: Logger = LoggerFactory.getLogger("Test Utilities")
 inline fun <reified T> T.multilinePrint(typeName: String? = T::class.simpleName) {
     val multilineString = try {
         ReflectionToStringBuilder.toString(this, CustomMultilineStyle)
-    }catch(e : Exception) {
+    } catch (e: Exception) {
         this.toString()
     }
     logger.trace("$typeName = $multilineString")
@@ -54,7 +62,8 @@ fun nonExistingFile(path: String): File {
 fun existingDirectory(path: String = "/default/path"): Directory {
     val directory = Mockito.mock(Directory::class.java)
     Mockito.`when`(directory.exists()).thenReturn(true)
-    Mockito.`when`(directory.path).thenReturn(path)
+    //TODO:  Fix this:
+    // Mockito.`when`(directory.path).thenReturn(path)
 
     return directory
 }
@@ -62,15 +71,42 @@ fun existingDirectory(path: String = "/default/path"): Directory {
 fun nonExistingDirectory(path: String): Directory {
     val directory = Mockito.mock(Directory::class.java)
     Mockito.`when`(directory.exists()).thenReturn(false)
-    Mockito.`when`(directory.path).thenReturn(path)
+    // TODO:  Fix this
+    //Mockito.`when`(directory.path).thenReturn(path)
     return directory
 }
 
-fun tempFileFromResource(resourcePath: String): File = kotlin.io.path.createTempFile().toFile().apply {
-    writeText(Resources.getResource(resourcePath).readText())
+val killPattern: ExecutableScript = BashScript(commandName = "kill-pattern", body = Body.fromResource("/bash-scripts/kill-pattern.sh")).createExecutableScript()
+fun killPatterns(vararg args: String) {
+    args.toList().forEach { killPattern.execute(listOf(it)) }
 }
 
-val killPattern : ExecutableScript = BashScript(commandName = "kill-pattern", body = Body.fromResource("/bash-scripts/kill-pattern.sh")).createExecutableScript()
-fun killPatterns(vararg args : String) {
-    args.toList().forEach { killPattern.execute(listOf(it)) }
+fun File.addChildDirectory(suffix: String = ""): File = addChild(Generators.filename() + suffix) {mkdir() }
+fun File.addChildFile(extension: String = Generators.extension()): File  = addChild(Generators.filename() + extension) { createNewFile() }
+fun File.addChild(name : String, block : (File) -> Unit) : File {
+    withAssumption({ "$absolutePath should be a directory" }) { isDirectory() shouldBe true }
+    return File(this, name).apply(block)
+}
+
+fun randomPathName(min : Int = 1, max : Int = 5) : String {
+    val depth = ints().range(min, max).get()
+    return pick(pathNames, depth).joinToString(prefix = "/", separator = "/")
+}
+inline fun <R> withAssumption(crossinline clue: () -> Any?, thunk: () -> R): R {
+    val collector = errorCollector
+    try {
+        collector.pushClue {
+            buildString {
+                append("Assumption failed: '")
+                append(clue.invoke().toString())
+                append("'")
+            }
+        }
+        return thunk()
+        // this is a special control exception used by coroutines
+    } catch (t: TimeoutCancellationException) {
+        throw Exceptions.createAssertionError(clueContextAsString() + (t.message ?: ""), t)
+    } finally {
+        collector.popClue()
+    }
 }
