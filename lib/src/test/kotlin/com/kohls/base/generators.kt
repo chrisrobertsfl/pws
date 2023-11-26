@@ -107,12 +107,10 @@ object Generators {
         "bulletins"
     )
 
-    private val fileExtensions = listOf(
+     val fileExtensions = listOf(
         ".txt", ".pdf", ".docx", ".xlsx", ".pptx", ".jpg", ".png", ".mp3", ".mp4", ".zip"
     )
 
-    fun filename() = pickOne(pathNames)
-    fun extension() = pickOne(fileExtensions)
 
     inline fun <reified T> pick(list: List<T>, howManyTimes: Int = 1): List<T> = buildList {
         repeat(howManyTimes) {
@@ -120,6 +118,6 @@ object Generators {
         }
     }
 
-    private inline fun <reified T> pickOne(list: List<T>): T = pick(list).first()
+     inline fun <reified T> pickOne(list: List<T>): T = pick(list).first()
 
 }

@@ -4,13 +4,13 @@ import com.kohls.base.Directory
 import org.slf4j.LoggerFactory
 
 // TODO: Unit test!
-data class GitCheckout(override val name: String = generateName(), var branchName: String = BRANCH) : Action {
+data class GitCheckout(override val name: String = generateName(), var branchName: String = BRANCH, val bashScript: BashScript = BASH_SCRIPT) : Action {
     var targetDirectoryPath: String? = null
     private val logger by lazy { LoggerFactory.getLogger(GitCheckout::class.java) }
     override fun perform(parameters: Parameters): Parameters {
         logger.trace("parameters are {}", parameters)
         val workingDirectory = resolveTargetDirectoryPath(parameters)
-        BASH_SCRIPT.createExecutableScript(workingDirectory = workingDirectory).execute(listOf(branchName))
+        bashScript.createExecutableScript(workingDirectory = workingDirectory).execute(listOf(branchName))
         return Parameters.create("targetDirectoryPath" to workingDirectory.path)
     }
 

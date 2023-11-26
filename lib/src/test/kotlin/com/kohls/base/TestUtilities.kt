@@ -1,6 +1,5 @@
 package com.kohls.base
 
-import com.google.common.io.Resources
 import com.kohls.base.Generators.pathNames
 import com.kohls.base.Generators.pick
 import com.kohls.pws.BashScript
@@ -71,22 +70,26 @@ fun nonExistingDirectory(path: String): Directory {
     return directory
 }
 
+fun filename() = Generators.pickOne(pathNames)
+fun extension() = Generators.pickOne(Generators.fileExtensions)
+
 val killPattern: ExecutableScript = BashScript(commandName = "kill-pattern", body = Body.fromResource("/bash-scripts/kill-pattern.sh")).createExecutableScript()
 fun killPatterns(vararg args: String) {
     args.toList().forEach { killPattern.execute(listOf(it)) }
 }
 
-fun File.addChildDirectory(suffix: String = ""): File = addChild(Generators.filename() + suffix) {mkdir() }
-fun File.addChildFile(extension: String = Generators.extension()): File  = addChild(Generators.filename() + extension) { createNewFile() }
-fun File.addChild(name : String, block : (File) -> Unit) : File {
+fun File.addChildDirectory(suffix: String = ""): File = addChild(filename() + suffix) { mkdir() }
+fun File.addChildFile(extension: String = extension()): File = addChild(filename() + extension) { createNewFile() }
+fun File.addChild(name: String, block: (File) -> Unit): File {
     withAssumption({ "$absolutePath should be a directory" }) { isDirectory() shouldBe true }
     return File(this, name).apply(block)
 }
 
-fun randomPathName(min : Int = 1, max : Int = 5) : String {
+fun randomPathName(min: Int = 1, max: Int = 5): String {
     val depth = ints().range(min, max).get()
     return pick(pathNames, depth).joinToString(prefix = "/", separator = "/")
 }
+
 inline fun <R> withAssumption(crossinline clue: () -> Any?, thunk: () -> R): R {
     val collector = errorCollector
     try {
