@@ -2,9 +2,6 @@ package com.kohls.pws
 
 import kotlin.reflect.KClass
 
-
-// TODO: Test separately
-// TODO: Also is this a best practice to have this as a global?
 object ActionRegistry {
     private val registry = mutableMapOf<KClass<*>, (String) -> Action>()
 
