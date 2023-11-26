@@ -3,7 +3,7 @@ package com.kohls.base
 import org.slf4j.LoggerFactory
 import kotlin.time.Duration
 
-data class NumberOfAttempts(val attempts: Int, val initialDelay: Duration = CriteriaMet.INITIAL_DELAY, val interval: Duration = CriteriaMet.INTERVAL) : CriteriaMet {
+data class NumberOfAttempts(val attempts: Int, val initialDelay: Duration = Criteria.INITIAL_DELAY, val interval: Duration = Criteria.INTERVAL) : Criteria {
     private val logger by lazy { LoggerFactory.getLogger(NumberOfAttempts::class.java) }
 
     override fun checkCondition(condition: Condition): Boolean {

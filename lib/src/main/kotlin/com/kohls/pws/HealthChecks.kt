@@ -1,6 +1,6 @@
 package com.kohls.pws
 
-import com.kohls.base.CriteriaMet.Companion.INITIAL_DELAY
+import com.kohls.base.Criteria.Companion.INITIAL_DELAY
 import com.kohls.base.Eventually
 import com.kohls.base.NumberOfAttempts
 import khttp.get
