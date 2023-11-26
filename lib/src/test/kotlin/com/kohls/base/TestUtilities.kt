@@ -62,17 +62,12 @@ fun nonExistingFile(path: String): File {
 fun existingDirectory(path: String = "/default/path"): Directory {
     val directory = Mockito.mock(Directory::class.java)
     Mockito.`when`(directory.exists()).thenReturn(true)
-    //TODO:  Fix this:
-    // Mockito.`when`(directory.path).thenReturn(path)
-
     return directory
 }
 
 fun nonExistingDirectory(path: String): Directory {
     val directory = Mockito.mock(Directory::class.java)
     Mockito.`when`(directory.exists()).thenReturn(false)
-    // TODO:  Fix this
-    //Mockito.`when`(directory.path).thenReturn(path)
     return directory
 }
 
