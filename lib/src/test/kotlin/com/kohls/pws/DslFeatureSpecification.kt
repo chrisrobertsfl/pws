@@ -251,7 +251,7 @@ class DslFeatureSpecification : FeatureSpec({
                         goals += "exec:java"
                     }
                     action<LogFileEventuallyContains>("l") {
-                        duration = 0.seconds
+                        duration = 0.1.seconds
                         searchedText = "INFO: Started Stub Server with port 8080"
                     }
                 }

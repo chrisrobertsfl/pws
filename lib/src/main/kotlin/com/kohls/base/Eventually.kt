@@ -8,6 +8,8 @@ import java.lang.Thread.sleep
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource.Monotonic.markNow
 
 sealed interface CriteriaMet {
     fun checkCondition(condition: Condition): Boolean
@@ -19,17 +21,30 @@ sealed interface CriteriaMet {
     }
 }
 
-data class TimeFrame(val duration: Duration, val initialDelay: Duration = INITIAL_DELAY, val interval: Duration = INTERVAL) : CriteriaMet {
+@OptIn(ExperimentalTime::class)
 
-    private val logger by lazy { LoggerFactory.getLogger(NumberOfAttempts::class.java) }
+data class TimeFrame(
+    val duration: Duration,
+    val initialDelay: Duration = INITIAL_DELAY,
+    val interval: Duration = INTERVAL
+) : CriteriaMet {
+
+    init {
+        require(duration.isPositive()) { "Duration must be a positive value -> $duration" }
+    }
+
+    private val logger by lazy { LoggerFactory.getLogger(TimeFrame::class.java) }
+    private val startTime = markNow()
+
 
     override fun checkCondition(condition: Condition): Boolean {
-        val endTime = currentTimeMillis() + duration.inWholeMilliseconds
-        logger.debug("$initialDelay initial delay before checking duration for $duration")
+        val endTime = startTime.plus(duration)
+        logger.debug("$initialDelay initial delay before checking duration of $duration")
         delayFor(initialDelay)
 
-        while (currentTimeMillis() < endTime) {
-            logger.debug("Checking condition ${condition.name ?: ""}")
+        while (!endTime.hasPassedNow()) {
+            val elapsed = startTime.elapsedNow().inWholeMilliseconds
+            logger.debug("Checking condition ${condition.name} at time ${elapsed}ms")
             if (condition.isMet()) return true
             logger.debug("$interval interval delay")
             delayFor(interval)
