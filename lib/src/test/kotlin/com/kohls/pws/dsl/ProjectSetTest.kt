@@ -17,14 +17,14 @@ class ProjectSetTest : FeatureSpec({
             val projectSet = projectSet("simple") {
                 project("project1") {
                     action<Simple>("simple1") {
-
+                        favoriteColor = "red"
                     }
                 }
             }
             projectSet shouldBe ProjectSet(
                 name = ProjectSetName("simple"), projects = setOf(
                     Project(
-                        name = ProjectName("project1"), actions = listOf(SimpleAction(ActionName("simple1")))
+                        name = ProjectName("project1"), actions = listOf(SimpleAction(ActionName("simple1"), color = "red"))
                     )
                 )
             )
@@ -35,12 +35,14 @@ class ProjectSetTest : FeatureSpec({
 })
 
 data class Simple(override val name: String) : ActionBuilder<SimpleAction> {
+
+    var favoriteColor: String? = null
     override fun build(): SimpleAction {
-        return SimpleAction(ActionName(name))
+        return SimpleAction(name = ActionName(name), color = requireNotNull(favoriteColor) { "Missing favorite color" })
     }
 }
 
-data class SimpleAction(override val name: ActionName) : Action {
+data class SimpleAction(override val name: ActionName, val color: String) : Action {
     override fun perform(): String {
         return "Hello from ${name.contents}"
     }
