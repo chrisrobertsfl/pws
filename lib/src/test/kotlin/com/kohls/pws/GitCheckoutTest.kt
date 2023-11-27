@@ -17,20 +17,18 @@ class GitCheckoutTest : FeatureSpec({
         val inputPath = targetDirectoryPath.absolutePathString()
         val gitCheckout = GitCheckout(bashScript = createBashScript(inputPath))
         val expectedParameters = Parameters(mutableMapOf("targetDirectoryPath" to targetDirectoryPath))
-        
-        scenario("Successful git checkout with specified branch and directory should succeed") {
+
+        scenario("Successful git checkout with specified branch and directory") {
             gitCheckout.apply { this.targetDirectoryPath = inputPath }.perform(Parameters.EMPTY) shouldBe expectedParameters
         }
 
-        scenario("Git checkout with missing target directory path in parameters should succeed") {
+        scenario("Successful git checkout with missing target directory path in parameters") {
             gitCheckout.perform(Parameters(mutableMapOf("targetDirectoryPath" to inputPath))) shouldBe expectedParameters
         }
 
-        scenario("Git checkout with invalid target directory path should raise exception") {
+        scenario("Failed git checkout with invalid target directory path") {
             shouldThrowExactly<IllegalArgumentException> { GitCheckout(bashScript = createBashScript(inputPath)).perform(Parameters.EMPTY) }
-
         }
-
     }
 })
 

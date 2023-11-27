@@ -4,7 +4,6 @@ import com.kohls.base.Directory
 import org.slf4j.LoggerFactory
 
 
-// TODO: Unit test!
 data class GitClone(override val name: String = generateName(), var overwrite: Boolean = true) : Action {
     var repositoryUrl: String? = null
     var targetDirectoryPath: String? = null
