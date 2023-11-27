@@ -20,7 +20,7 @@ class ActRegistryTest : FeatureSpec({
                 it.name shouldBe "Dummy name"
             }
             builder.build().also {
-                it.name shouldBe builder.name
+                it.name shouldBe ActName(builder.name)
                 it.perform() shouldBe "DummyAct performing"
             }
         }
@@ -36,7 +36,7 @@ class ActRegistryTest : FeatureSpec({
                 it.name shouldBe "Dummy1 name"
             }
             builder.build().also {
-                it.name shouldBe builder.name
+                it.name shouldBe ActName(builder.name)
                 it.perform() shouldBe "Dummy1Act performing"
             }
         }
@@ -45,17 +45,17 @@ class ActRegistryTest : FeatureSpec({
 
 class DummyBuilder(override val name: String) : ActBuilder<DummyAct> {
     override fun build(): DummyAct {
-        return DummyAct(name)
+        return DummyAct(ActName(name))
     }
 }
 
-data class DummyAct(override val name: String) : Act {
+data class DummyAct(override val name: ActName) : Act {
     override fun perform(): String {
         return "DummyAct performing"
     }
 }
 
-class Dummy1Act(override val name: String) : Act {
+class Dummy1Act(override val name: ActName) : Act {
 
     override fun perform(): String {
         return "Dummy1Act performing"
@@ -64,15 +64,11 @@ class Dummy1Act(override val name: String) : Act {
 
 class Dummy1Builder(override val name: String) : ActBuilder<Dummy1Act> {
     override fun build(): Dummy1Act {
-        return Dummy1Act(name)
+        return Dummy1Act(ActName(name))
     }
 }
 
 object ActRegistry {
-//    private val registry: Map<KClass<out ActBuilder<*>>, (String) -> ActBuilder<*>> =
-//        mapOf(DummyBuilder::class to { name -> DummyBuilder(name) }, Dummy1Builder::class to { name -> Dummy1Builder(name) })
-
-
     private val registry: MutableMap<KClass<out ActBuilder<*>>, (String) -> ActBuilder<*>> = mutableMapOf()
     fun <T : ActBuilder<*>> create(builderType: KClass<T>, name: String): T {
         val builderFactory = registry[builderType] ?: throw IllegalStateException("No builder registered for type: $builderType")
@@ -94,6 +90,8 @@ interface ActBuilder<T : Act> {
 }
 
 interface Act {
-    val name: String
+    val name: ActName
     fun perform(): String
 }
+
+data class ActName(val contents : String)
