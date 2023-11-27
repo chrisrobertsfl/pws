@@ -35,6 +35,7 @@ dependencies {
     // Mockito
     testImplementation("org.mockito:mockito-core:5.6.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("io.mockk:mockk:1.13.8")
 
 
     // Utilities
