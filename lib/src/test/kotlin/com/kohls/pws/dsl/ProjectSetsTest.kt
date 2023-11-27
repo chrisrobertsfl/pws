@@ -1,7 +1,7 @@
 package com.kohls.pws.dsl
 
-import com.kohls.pws.model.Action
-import com.kohls.pws.model.ActionName
+import com.kohls.pws.Parameters
+import com.kohls.pws.model.*
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 
@@ -22,14 +22,15 @@ class ProjectSetTest : FeatureSpec({
                 }
             }
             projectSet shouldBe ProjectSet(
-                name = ProjectSetName("simple"), projects = setOf(
+                name = ProjectSetName("simple"),
+                projects = setOf(
                     Project(
                         name = ProjectName("project1"), actions = listOf(SimpleAction(ActionName("simple1"), color = "red"))
                     )
-                )
-            )
-
+                ),
+            parameters = Parameters.create("projectSetName" to ProjectSetName("simple")))
             projectSet.projects.first().actions.first().perform() shouldBe "Hello from simple1"
+            projectSet.parameters shouldBe Parameters.create("projectSetName" to projectSet.name)
         }
     }
 })
@@ -48,38 +49,3 @@ data class SimpleAction(override val name: ActionName, val color: String) : Acti
     }
 }
 
-fun projectSet(name: String, block: ProjectSetBuilder.() -> Unit): ProjectSet {
-    val builder = ProjectSetBuilder(name)
-    return builder.apply(block).build()
-}
-
-
-class ProjectBuilder(val name: String) {
-    val actions = mutableListOf<Action>()
-    fun build(): Project {
-        return Project(ProjectName(name), actions)
-    }
-
-    inline fun <reified T : ActionBuilder<*>> action(name: String, noinline block: T.() -> Unit) {
-        val builder = ActionRegistry.create(T::class, name)
-        builder.block()
-        actions += builder.build()
-    }
-}
-
-class ProjectSetBuilder(val name: String) {
-    val projects = mutableSetOf<Project>()
-    fun build(): ProjectSet {
-        return ProjectSet(ProjectSetName(name), projects)
-    }
-
-    fun project(name: String, block: ProjectBuilder.() -> Unit) {
-        val builder = ProjectBuilder(name)
-        projects += builder.apply(block).build()
-    }
-}
-
-data class ProjectSet(val name: ProjectSetName, val projects: Set<Project>)
-data class ProjectSetName(val contents: String)
-data class Project(val name: ProjectName, val actions: List<Action>)
-data class ProjectName(val contents: String)
