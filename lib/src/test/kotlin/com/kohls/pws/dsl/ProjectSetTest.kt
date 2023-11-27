@@ -6,12 +6,21 @@ import io.kotest.matchers.shouldBe
 class ProjectSetTest :  FeatureSpec({
 
     feature("Creation") {
-        projectSet("simple") shouldBe ProjectSet( ProjectSetName("simple"))
+        scenario("Simple") {
+            projectSet("simple") {} shouldBe ProjectSet(ProjectSetName("simple"))
+        }
     }
 })
 
-fun projectSet(name : String) : ProjectSet {
-     return ProjectSet(ProjectSetName(name))
+fun projectSet(name : String, block : ProjectSetBuilder.() -> Unit) : ProjectSet {
+    val builder = ProjectSetBuilder(name)
+    return builder.apply(block).build()
+}
+
+class ProjectSetBuilder(val name : String) {
+    fun build() : ProjectSet {
+        return ProjectSet(ProjectSetName(name))
+    }
 }
 
 data class ProjectSet(val name : ProjectSetName)
