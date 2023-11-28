@@ -10,13 +10,13 @@ class ExecutionEndToEndTest : StringSpec({
 
     beforeTest {
         ActionRegistry.unregisterAll()
-        ActionRegistry.register(GitCheckoutBuilder::class) { GitCheckoutBuilder(it) }
+        ActionRegistry.register(GitCheckout::class) { GitCheckout(it) }
     }
 
     "Checkout and Run OLM Projects" {
         projectSet("OLM") {
             project("Config Server") {
-                action<GitCheckoutBuilder>("Config Server Checkout - influx_container") {
+                action<GitCheckout>("Config Server Checkout - influx_container") {
                     target("/Users/TKMA5QX/projects/olm-meta-repo/config-server")
                     branch("influx_container")
                 }

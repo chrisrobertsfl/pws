@@ -10,7 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlin.io.path.absolutePathString
 
-class GitCheckoutTest : FeatureSpec({
+class GitCheckoutActionTest : FeatureSpec({
     feature("Git Checkout Action") {
         val targetPath = tempdir().toPath()
 
