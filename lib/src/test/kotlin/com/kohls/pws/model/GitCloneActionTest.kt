@@ -1,14 +1,15 @@
-package com.kohls.pws
+package com.kohls.pws.model
 
 import com.kohls.base.Directory
-import com.kohls.pws.model.ActionName
-import com.kohls.pws.model.GitCloneAction
-import com.kohls.pws.model.GitRepositoryUrl
+import com.kohls.pws.BashScript
+import com.kohls.pws.ExecutableScript
+import com.kohls.pws.Parameters
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 
 class GitCloneActionTest : FeatureSpec({
 
@@ -31,7 +32,9 @@ class GitCloneActionTest : FeatureSpec({
         scenario("Git clone with overwrite false and existing target directory") {
             every { target.exists() } returns true
             shouldThrowExactly<java.lang.IllegalStateException> {
-                performAction(target, overwrite = false)
+                GitCloneAction(
+                    name = mockk<ActionName>(), repositoryUrl = mockk<GitRepositoryUrl>(), target = target, bashScript = mockk<BashScript>(relaxed = true), overwrite = false
+                ).perform(mockk<Parameters>())
             }.message shouldBe "target directory '${target.path}' already exists and cannot be overwritten when overwrite is enabled"
         }
 
@@ -42,12 +45,18 @@ class GitCloneActionTest : FeatureSpec({
 })
 
 
-fun performAction(target: Directory, overwrite: Boolean = true) : Parameters {
+fun performAction(target: Directory, overwrite: Boolean = true): Parameters {
     val repositoryUrl = mockk<GitRepositoryUrl>()
     every { repositoryUrl.path } returns "gitlab@dummyRepo"
-    return GitCloneAction(
-        name = mockk<ActionName>(), repositoryUrl = repositoryUrl, target = target, bashScript = mockk<BashScript>(relaxed = true), overwrite = overwrite
+    val bashScript = mockk<BashScript>(relaxed = true)
+    val executableScript = mockk<ExecutableScript>(relaxed = true)
+    every { bashScript.createExecutableScript() } returns executableScript
+    val parameters = GitCloneAction(
+        name = mockk<ActionName>(), repositoryUrl = repositoryUrl, target = target, bashScript = bashScript, overwrite = overwrite
     ).perform(mockk<Parameters>())
+    verify { bashScript.createExecutableScript() }
+    verify { executableScript.execute(any()) }
+    return parameters
 }
 
 
