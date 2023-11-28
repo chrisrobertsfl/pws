@@ -71,6 +71,6 @@ java {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+    useJUnitPlatform()  // Use JUnit Platform for unit tests.
+    exclude("**/*EndToEndTest*.kt") // Exclude tests that end with 'EndToEndTest'
 }

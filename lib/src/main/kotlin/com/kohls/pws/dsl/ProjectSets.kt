@@ -6,7 +6,7 @@ import com.kohls.pws.model.ProjectSet
 import com.kohls.pws.model.ProjectSetName
 
 class ProjectSetBuilder(val name: String) {
-    val projects = mutableSetOf<Project>()
+    private val projects = mutableSetOf<Project>()
     fun build(): ProjectSet {
         val projectSetName = ProjectSetName(name)
         val parameters = Parameters.create("projectSetName" to projectSetName)
