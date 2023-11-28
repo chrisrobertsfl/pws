@@ -11,13 +11,19 @@ class ExecutionEndToEndTest : StringSpec({
     beforeTest {
         ActionRegistry.unregisterAll()
         ActionRegistry.register(GitCheckout::class) { GitCheckout(it) }
+        ActionRegistry.register(GitClone::class) { GitClone(it) }
     }
 
     "Checkout and Run OLM Projects" {
         projectSet("OLM") {
             project("Config Server") {
+                action<GitClone>("Config Server Clone") {
+                    repositoryUrl("git@gitlab.com:kohls/scps/scf/olm/config-server.git")
+                    target("/tmp/workspaces/config-server")
+
+                }
                 action<GitCheckout>("Config Server Checkout - influx_container") {
-                    target("/Users/TKMA5QX/projects/olm-meta-repo/config-server")
+                    target("/tmp/workspaces/config-server")
                     branch("influx_container")
                 }
             }

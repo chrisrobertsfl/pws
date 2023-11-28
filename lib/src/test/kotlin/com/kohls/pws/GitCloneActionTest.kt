@@ -33,7 +33,6 @@ class GitCloneActionTest : FeatureSpec({
             shouldThrowExactly<java.lang.IllegalStateException> {
                 performAction(target, overwrite = false)
             }.message shouldBe "target directory '${target.path}' already exists and cannot be overwritten when overwrite is enabled"
-
         }
 
         scenario("Git clone with overwrite false and non-existing target directory") {}
@@ -43,9 +42,14 @@ class GitCloneActionTest : FeatureSpec({
 })
 
 
-fun performAction(target: Directory, overwrite: Boolean = true) = GitCloneAction(
-    name = mockk<ActionName>(), repositoryUrl = mockk<GitRepositoryUrl>(), target = target, bashScript = mockk<BashScript>(relaxed = true), overwrite = overwrite
-).perform(mockk<Parameters>())
+fun performAction(target: Directory, overwrite: Boolean = true) : Parameters {
+    val repositoryUrl = mockk<GitRepositoryUrl>()
+    every { repositoryUrl.path } returns "gitlab@dummyRepo"
+    return GitCloneAction(
+        name = mockk<ActionName>(), repositoryUrl = repositoryUrl, target = target, bashScript = mockk<BashScript>(relaxed = true), overwrite = overwrite
+    ).perform(mockk<Parameters>())
+}
+
 
 
 
