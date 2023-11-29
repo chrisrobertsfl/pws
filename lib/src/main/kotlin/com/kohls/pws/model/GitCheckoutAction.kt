@@ -5,16 +5,17 @@ import com.kohls.pws.BashScript
 import com.kohls.pws.Body
 import com.kohls.pws.Parameters
 
-data class GitCheckoutAction(override val name: ActionName, val branch: GitBranch, val target: Directory? = null, val bashScript: BashScript = BASH_SCRIPT) : Action {
+data class GitCheckoutAction(override val name: ActionName, val branch: GitBranch, private var target: Directory? = null, val bashScript: BashScript = BASH_SCRIPT) : Action {
     override fun perform(): String {
         TODO("Not yet implemented")
     }
 
     override fun perform(input: Parameters): Parameters {
-        val workingDirectory = target ?: input.getOrThrow("target")
-        workingDirectory.existsOrThrow("Invalid targetDirectoryPath: ${workingDirectory.path} does not exist.")
-        bashScript.createExecutableScript(workingDirectory = workingDirectory).execute(listOf(branch.name))
-        return Parameters.create("target" to workingDirectory)
+        target = target ?: input.getOrThrow("target")
+
+        target?.existsOrThrow("Invalid targetDirectoryPath: ${target?.path} does not exist.")
+        bashScript.createExecutableScript(workingDirectory = target).execute(listOf(branch.name))
+        return Parameters.create("target" to target!!)
     }
 
     companion object {
